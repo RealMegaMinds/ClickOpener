@@ -1,38 +1,27 @@
 {
   "schemaVersion": 1,
-  "id": "modid",
+  "id": "clickopener",
   "version": "${version}",
 
-  "name": "Example Mod",
-  "description": "This is an example description! Tell everyone what your mod is about!",
+  "name": "Click Opener Mod",
+  "description": "Fabric Mod that opens inventory screens when their items are clicked",
   "authors": [
-    "Me!"
+    "Hoid2"
   ],
-  "contact": {
-    "homepage": "https://fabricmc.net/",
-    "sources": "https://github.com/FabricMC/fabric-example-mod"
-  },
-
-  "license": "CC0-1.0",
-  "icon": "assets/modid/icon.png",
-
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/clickopener/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
-      "net.fabricmc.example.ExampleMod"
+      "megaminds.clickopener.ClickOpenerMod"
     ]
   },
   "mixins": [
-    "modid.mixins.json"
+    "clickopener.mixins.json"
   ],
-
   "depends": {
-    "fabricloader": ">=0.13.3",
     "fabric": "*",
-    "minecraft": "1.18.x",
-    "java": ">=17"
-  },
-  "suggests": {
-    "another-mod": "*"
+    "minecraft": "1.18.x"
   }
 }
