@@ -1,4 +1,4 @@
-package megaminds.clickopener;
+package megaminds.clickopener.screenhandlers;
 
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,6 +19,7 @@ public class ShulkerInventory implements Inventory, NamedScreenHandlerFactory {
 	public static final int INVENTORY_SIZE = 27;
 	public static final String ITEMS_KEY = "Items";
 	public static final String NAME_KEY = "CustomName";
+
 	private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(INVENTORY_SIZE, ItemStack.EMPTY);
 	private Text customName;
 	private ItemStack link;

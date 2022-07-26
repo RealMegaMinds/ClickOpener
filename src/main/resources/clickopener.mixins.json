@@ -3,7 +3,9 @@
   "minVersion": "0.8",
   "package": "megaminds.clickopener.mixin",
   "mixins": [
-    "BlockItemMixin"
+    "BlockItemMixin",
+    "AnvilScreenHandlerInvoker",
+    "ServerPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
