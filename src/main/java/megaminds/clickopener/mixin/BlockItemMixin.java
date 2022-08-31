@@ -15,7 +15,7 @@ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.tag.BlockTags;
-import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ClickType;
 import net.minecraft.util.registry.Registry;
 
@@ -46,7 +46,7 @@ public abstract class BlockItemMixin extends Item {
 			NamedScreenHandlerFactory factory = null;
 			var name = Registry.ITEM.getId(this).getPath();
 			if (this == Items.ENDER_CHEST) {
-				factory = new SimpleNamedScreenHandlerFactory((syncId, inventory, player2)->GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player2.getEnderChestInventory()), Text.translatable("container.enderchest"));
+				factory = new SimpleNamedScreenHandlerFactory((syncId, inventory, player2)->GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player2.getEnderChestInventory()), new TranslatableText("container.enderchest"));
 			} else if (this == Items.ENCHANTING_TABLE) {
 				factory = new PermissiveNamedScreenHandlerFactory((syncId, inventory, player2)->new EnchantmentScreenHandler(syncId, inventory, ScreenHandlerContext.create(p.getWorld(), p.getBlockPos())), clickedStack.getName());
 			} else if (EASY.contains(name)) {
@@ -54,7 +54,7 @@ public abstract class BlockItemMixin extends Item {
 			} else if (blockState.isIn(BlockTags.SHULKER_BOXES)) {
 				factory = new ShulkerInventory(clickedStack);
 			} else if (blockState.isIn(BlockTags.ANVIL)) {
-				factory = new SimpleNamedScreenHandlerFactory((syncId, inventory, player2)->new AnvilScreenHandler2(syncId, inventory, ScreenHandlerContext.create(p.getWorld(), p.getBlockPos()), slot.inventory, slot.getIndex()), Text.translatable("container.repair"));
+				factory = new SimpleNamedScreenHandlerFactory((syncId, inventory, player2)->new AnvilScreenHandler2(syncId, inventory, ScreenHandlerContext.create(p.getWorld(), p.getBlockPos()), slot.inventory, slot.getIndex()), new TranslatableText("container.repair"));
 			}
 
 			if (factory != null && Config.getInstance().isAllowed(name)) {

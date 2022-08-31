@@ -5,7 +5,8 @@
   "mixins": [
     "BlockItemMixin",
     "AnvilScreenHandlerInvoker",
-    "ServerPlayNetworkHandlerMixin"
+    "ServerPlayNetworkHandlerMixin",
+    "ServerPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

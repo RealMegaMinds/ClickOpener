@@ -13,6 +13,7 @@ import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 import net.minecraft.util.collection.DefaultedList;
 
 public class ShulkerInventory implements Inventory, NamedScreenHandlerFactory {
@@ -69,7 +70,7 @@ public class ShulkerInventory implements Inventory, NamedScreenHandlerFactory {
 		if (customName != null) {
 			return customName;
 		}
-		return Text.translatable("container.shulkerBox");
+		return new TranslatableText("container.shulkerBox");
 	}
 
 	@Override

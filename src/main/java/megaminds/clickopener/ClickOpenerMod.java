@@ -1,7 +1,7 @@
 package megaminds.clickopener;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.command.v1.CommandRegistrationCallback;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.text.Text;
 
@@ -14,7 +14,7 @@ public class ClickOpenerMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, env) ->
+		CommandRegistrationCallback.EVENT.register((dispatcher, dedicated) ->
 		dispatcher.register(CommandManager.literal(MODID)
 				.then(CommandManager.literal("reload")
 						.executes(context->{

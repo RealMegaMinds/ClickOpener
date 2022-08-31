@@ -115,6 +115,10 @@ public class Config {
 	}
 
 	public boolean isAllowed(String name) {
+		if (name.endsWith("shulker_box")) {
+			name = "shulker_box";	
+		}
+
 		return switch (name) {
 		case "smithing_table" -> smithingTable;
 		case "crafting_table" -> craftingTable;
