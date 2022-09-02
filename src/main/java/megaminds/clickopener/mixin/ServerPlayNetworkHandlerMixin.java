@@ -6,7 +6,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import megaminds.clickopener.CloseIgnorer;
 import megaminds.clickopener.GuiScheduler;
 import net.minecraft.item.ItemStack;
@@ -23,7 +22,7 @@ public class ServerPlayNetworkHandlerMixin implements GuiScheduler {
 	@Unique
 	private NamedScreenHandlerFactory fac;
 
-	@Inject(at = @At(value = "TAIL"), method = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;onClickSlot(Lnet/minecraft/network/packet/c2s/play/ClickSlotC2SPacket;)V")
+	@Inject(at = @At("TAIL"), method = "onClickSlot")
 	public void clickopenerEndClick(ClickSlotC2SPacket packet, CallbackInfo info) {
 		if (fac != null) {
 			var cursorStack = player.currentScreenHandler.getCursorStack();
