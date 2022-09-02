@@ -1,5 +1,7 @@
-package megaminds.clickopener;
+package megaminds.clickopener.screenhandlers;
 
+import megaminds.clickopener.Config;
+import megaminds.clickopener.InventoryHelper;
 import megaminds.clickopener.mixin.AnvilScreenHandlerInvoker;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
