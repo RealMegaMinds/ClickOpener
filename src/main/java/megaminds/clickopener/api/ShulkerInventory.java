@@ -1,4 +1,4 @@
-package megaminds.clickopener.screenhandlers;
+package megaminds.clickopener.api;
 
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;

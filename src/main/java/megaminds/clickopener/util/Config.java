@@ -1,4 +1,4 @@
-package megaminds.clickopener;
+package megaminds.clickopener.util;
 
 import java.io.IOException;
 import java.nio.file.Files;
