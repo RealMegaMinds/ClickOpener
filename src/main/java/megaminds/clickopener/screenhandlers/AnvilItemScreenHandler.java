@@ -1,8 +1,9 @@
 package megaminds.clickopener.screenhandlers;
 
-import megaminds.clickopener.Config;
-import megaminds.clickopener.InventoryHelper;
+import it.unimi.dsi.fastutil.Pair;
 import megaminds.clickopener.mixin.AnvilScreenHandlerInvoker;
+import megaminds.clickopener.util.InventoryHelper;
+import megaminds.clickopener.util.ScreenHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventory;
@@ -12,15 +13,16 @@ import net.minecraft.item.Items;
 import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.WorldEvents;
 
-public class AnvilScreenHandler2 extends AnvilScreenHandler {
-	private final InventoryLink link;
+public class AnvilItemScreenHandler extends AnvilScreenHandler {
+	private final ItemStack link;
+	private final Inventory inventory;
 
-	public AnvilScreenHandler2(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, Inventory link, int slot) {
+	public AnvilItemScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context, Inventory inventory, ItemStack link) {
 		super(syncId, playerInventory, context);
-		this.link = new InventoryLink(link, slot);
+		this.link = link;
+		this.inventory = inventory;
 	}
 
 	@Override
@@ -44,20 +46,18 @@ public class AnvilScreenHandler2 extends AnvilScreenHandler {
 		}
 		self.getLevelCost().set(0);
 		this.context.run((world, pos) -> {
-			if (!player.getAbilities().creativeMode && player.getRandom().nextFloat() < 0.12f) {
-				var next = getNextAnvilState(link.getStack().getItem());
-				link.getStack().decrement(1);
-				if (next==null) {
-					world.syncWorldEvent(WorldEvents.ANVIL_DESTROYED, pos, 0);
+			if (!player.getAbilities().creativeMode && player.getRandom().nextFloat() < .12f) {
+				var next = getNextAnvilState(link.getItem());
+				link.decrement(1);
+				if (next==null) {	//Anvil destroyed
 					((ServerPlayerEntity)player).closeHandledScreen();
+					world.syncWorldEvent(WorldEvents.ANVIL_DESTROYED, pos, 0);
 					return;
 				} else {
-					var nextStack = next.getDefaultStack();
-					if (!link.addStack(nextStack)) {
-						player.getInventory().offerOrDrop(nextStack);
-					}
-
-					if (!Config.getInstance().isAllowed(Registry.ITEM.getId(next).getPath())) {
+					var pair = addToInventory(next);
+					if (pair!=null) {	//Anvil fits
+						ScreenHelper.openScreen((ServerPlayerEntity)player, null, pair.left(), pair.right());
+					} else {
 						((ServerPlayerEntity)player).closeHandledScreen();
 					}
 				}
@@ -75,24 +75,15 @@ public class AnvilScreenHandler2 extends AnvilScreenHandler {
 		return null;
 	}
 
-	@Override
-	public boolean canUse(PlayerEntity player) {
-		return true;
-	}
-
-	private record InventoryLink(Inventory link, int slot) {
-		ItemStack getStack() {
-			return link.getStack(slot);
-		}
-
-		boolean addStack(ItemStack stack) {
-			if (getStack().isEmpty() && link.isValid(slot, stack)) {
-				link.setStack(slot, stack);
-			} else {
-				InventoryHelper.addStackToInventory(stack, link);
-				if (!stack.isEmpty()) return false;
-			}
-			return true;
-		}
+	/**
+	 * The returned stack may be different than the given stack if it was combined with another one.
+	 */
+	private Pair<ItemStack, Inventory> addToInventory(Item item) {
+		var stack2 = InventoryHelper.addItemToInventory(item, inventory);
+		if (stack2 != null) return Pair.of(stack2, inventory);
+		stack2 = InventoryHelper.addItemToInventory(item, player.getInventory());
+		if (stack2 != null) return Pair.of(stack2, player.getInventory());
+		player.dropItem(item);
+		return null;
 	}
 }

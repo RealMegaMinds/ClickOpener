@@ -2,31 +2,24 @@ package megaminds.clickopener.api;
 
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ShulkerBoxScreenHandler;
-import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 
-public class ShulkerInventory implements Inventory, NamedScreenHandlerFactory {
-	public static final int INVENTORY_SIZE = 27;
+public record ShulkerInventory(ItemStack link, int size, BlockEntityType<?> entityType, DefaultedList<ItemStack> inventory) implements Inventory {
 	public static final String ITEMS_KEY = "Items";
-	public static final String NAME_KEY = "CustomName";
 
-	private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(INVENTORY_SIZE, ItemStack.EMPTY);
-	private Text customName;
-	private ItemStack link;
+	public ShulkerInventory(ItemStack link, int size, BlockEntityType<?> entityType) {
+		this(link, size, entityType, DefaultedList.ofSize(size, ItemStack.EMPTY));
+		var blockNbt = BlockItem.getBlockEntityNbt(link);
+		if (blockNbt!=null) Inventories.readNbt(blockNbt, inventory);
+	}
 
-	public ShulkerInventory(ItemStack link) {
-		this.link = link;
-		readNbt();
+	private NbtCompound writeNbt() {
+		return Inventories.writeNbt(new NbtCompound(), this.inventory, false);
 	}
 
 	@Override
@@ -40,41 +33,12 @@ public class ShulkerInventory implements Inventory, NamedScreenHandlerFactory {
 	}
 
 	private void writeData() {
-		BlockItem.setBlockEntityNbt(link, BlockEntityType.SHULKER_BOX, writeNbt());
-	}
-
-	private void readNbt() {
-		if (link.hasCustomName()) {
-			this.customName = link.getName();
-		}
-
-		var blockNbt = BlockItem.getBlockEntityNbt(link);
-		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-		if (blockNbt!=null && blockNbt.contains(ITEMS_KEY, NbtElement.LIST_TYPE)) {
-			Inventories.readNbt(blockNbt, this.inventory);
-		}
-	}
-
-	private NbtCompound writeNbt() {
-		return Inventories.writeNbt(new NbtCompound(), this.inventory, false);
-	}
-
-	@Override
-	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player) {
-		return new ShulkerBoxScreenHandler(syncId, playerInventory, this);
-	}
-
-	@Override
-	public Text getDisplayName() {
-		if (customName != null) {
-			return customName;
-		}
-		return Text.translatable("container.shulkerBox");
+		BlockItem.setBlockEntityNbt(link, entityType, writeNbt());
 	}
 
 	@Override
 	public boolean isEmpty() {
-		return inventory.stream().allMatch(ItemStack::isEmpty);
+		return !inventory.stream().anyMatch(i->i!=null&&!i.isEmpty());
 	}
 
 	@Override
@@ -116,7 +80,7 @@ public class ShulkerInventory implements Inventory, NamedScreenHandlerFactory {
 
 	@Override
 	public int size() {
-		return INVENTORY_SIZE;
+		return size;
 	}
 
 	@Override

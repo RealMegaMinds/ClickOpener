@@ -2,137 +2,121 @@ package megaminds.clickopener.util;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.Objects;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+
+import megaminds.clickopener.ClickOpenerMod;
+import megaminds.clickopener.api.ClickType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.ClickType;
+import net.minecraft.util.Identifier;
 
-@SuppressWarnings({"java:S1104","java:S1192"})
 public class Config {
-	private static final String WRONG_CLICK_ERROR = "Configuration option 'clickType' must be " + ClickType.LEFT.name() + " or " + ClickType.RIGHT.name()+".";
-	@SuppressWarnings("java:S3008")
-	private static Config INSTANCE = new Config(new Properties());
+	private static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve(ClickOpenerMod.MODID+".properties");
+	private static final String CLICK_TYPE_KEY = "clickType";
+	private static final String DEFAULT_KEY = "default";
 
-	public final ClickType clickType;
-	public final boolean smithingTable;
-	public final boolean craftingTable;
-	public final boolean grindStone;
-	public final boolean stoneCutter;
-	public final boolean cartographyTable;
-	public final boolean loom;
-	public final boolean enderChest;
-	public final boolean shulkerBox;
-	public final boolean enchantingTable;
-	public final boolean anvil;
-	public final boolean chippedAnvil;
-	public final boolean damagedAnvil;
+	private static final List<Identifier> NON_DEFAULT_BLOCK_ITEMS = new ArrayList<>();
+	private static ClickType clickType;
+	private static boolean def;
+	private static Properties properties;
 
-	private Config(Properties properties) {
-		var prop = properties.getProperty("clickType");
-		if (ClickType.LEFT.name().equals(prop)) {
-			clickType = ClickType.LEFT;
-		} else if (ClickType.RIGHT.name().equals(prop)) {
-			clickType = ClickType.RIGHT;
+	public static void load() {		
+		if (Files.exists(CONFIG_FILE)) {
+			loadFromFile();
 		} else {
-			ClickOpenerMod.LOGGER.warn(WRONG_CLICK_ERROR);
-			clickType = ClickType.RIGHT;
+			createFile();
 		}
 
-		smithingTable = getOrElse(properties.getProperty("smithingTable"), false);
-		craftingTable = getOrElse(properties.getProperty("craftingTable"), false);
-		grindStone = getOrElse(properties.getProperty("grindStone"), false);
-		stoneCutter = getOrElse(properties.getProperty("stoneCutter"), false);
-		cartographyTable = getOrElse(properties.getProperty("cartographyTable"), false);
-		loom = getOrElse(properties.getProperty("loom"), false);
-		enderChest = getOrElse(properties.getProperty("enderChest"), true);
-		shulkerBox = getOrElse(properties.getProperty("shulkerBox"), true);
-		enchantingTable = getOrElse(properties.getProperty("enchantingTable"), false);
-		anvil = getOrElse(properties.getProperty("anvil"), false);
-		chippedAnvil = getOrElse(properties.getProperty("chippedAnvil"), false);
-		damagedAnvil = getOrElse(properties.getProperty("damagedAnvil"), false);
+		storeToFile();	//Ensures defaults show
 	}
 
-	private static boolean getOrElse(String bool, boolean def) {
-		return switch(Objects.requireNonNullElse(bool, "")) {
-		case "true" -> true;
-		case "false" -> false;
-		default -> def;
-		};
+	private static void createFile() {
+		try {
+			Files.createFile(CONFIG_FILE);
+		} catch (IOException e) {
+			ClickOpenerMod.LOGGER.error("Failed to create configuration file");
+			e.printStackTrace();
+		}
+		properties = new Properties();
 	}
 
-	public static Config getInstance() {
-		return INSTANCE;
-	}
-
-	public static void load() {
+	private static void loadFromFile() {
 		Properties properties = new Properties();
-		var configPath = FabricLoader.getInstance().getConfigDir().resolve(ClickOpenerMod.MODID+".properties");
-
-		if(!Files.exists(configPath)) {
-			try {
-				Files.createFile(configPath);	//Create the file if it doesn't already exist
-			} catch (IOException e) {
-				ClickOpenerMod.LOGGER.error("Failed to create configuration file!");
-				e.printStackTrace();
-				return;
-			}
-		} else {
-			try (var in = Files.newInputStream(configPath)) {
-				properties.load(in);	//Read the properties from the file if it does exist
-			} catch (IOException e) {
-				ClickOpenerMod.LOGGER.error("Failed to read configuration file!");
-				e.printStackTrace();
-				return;
-			}
+		try (var in = Files.newInputStream(CONFIG_FILE)) {
+			properties.load(in);
+		} catch (IOException e) {
+			ClickOpenerMod.LOGGER.error("Failed to read configuration file");
+			e.printStackTrace();
 		}
+		Config.properties = properties;
+		loadFromProperties();
+	}
 
-		INSTANCE = new Config(properties);	//Create the config based on the file
+	private static void loadFromProperties() {
+		clickType = ClickType.tryValueOf((String)properties.computeIfAbsent(CLICK_TYPE_KEY, k->ClickType.RIGHT.name()), ClickType.RIGHT);
+		def = Boolean.parseBoolean((String)properties.computeIfAbsent(DEFAULT_KEY, k->"false"));
 
-		INSTANCE.writeTo(properties);
-		try (var out = Files.newOutputStream(configPath)) {
+	}
+
+	private static void readBlocks() {
+		NON_DEFAULT_BLOCK_ITEMS.clear();
+		properties.forEach((key, value)->{
+			if (!(key instanceof String k) || !(value instanceof String v) || CLICK_TYPE_KEY.equals(key) || DEFAULT_KEY.equals(key)) return;
+
+			addItem(new Identifier(k), Boolean.parseBoolean(v), false);
+		});
+	}
+
+	public static void storeToFile() {
+		try (var out = Files.newOutputStream(CONFIG_FILE)) {
 			properties.store(out, "Configuration file for Click Opener Mod");
 		} catch (IOException e) {
-			ClickOpenerMod.LOGGER.error("Failed to write to configuration file!");
+			ClickOpenerMod.LOGGER.error("Failed to write configuration file");
 			e.printStackTrace();
 		}
 	}
 
-	private Properties writeTo(Properties properties) {
-		properties.setProperty("clickType", clickType.name());
-		properties.setProperty("smithingTable", Boolean.toString(smithingTable));
-		properties.setProperty("craftingTable", Boolean.toString(craftingTable));
-		properties.setProperty("grindStone", Boolean.toString(grindStone));
-		properties.setProperty("stoneCutter", Boolean.toString(stoneCutter));
-		properties.setProperty("cartographyTable", Boolean.toString(cartographyTable));
-		properties.setProperty("loom", Boolean.toString(loom));
-		properties.setProperty("enderChest", Boolean.toString(enderChest));
-		properties.setProperty("shulkerBox", Boolean.toString(shulkerBox));
-		properties.setProperty("enchantingTable", Boolean.toString(enchantingTable));
-		properties.setProperty("anvil", Boolean.toString(anvil));
-		properties.setProperty("chippedAnvil", Boolean.toString(chippedAnvil));
-		properties.setProperty("damagedAnvil", Boolean.toString(damagedAnvil));
-		return properties;
+	public static void setDefault(boolean def) {
+		if (Config.def == def) return;
+
+		Config.def = def;
+		properties.setProperty(DEFAULT_KEY, Boolean.toString(def));
+		readBlocks();
+		storeToFile();
 	}
 
-	public boolean isAllowed(String name) {
-		if (name.endsWith("shulker_box")) {
-			name = "shulker_box";	
-		}
-		
-		return switch (name) {
-		case "smithing_table" -> smithingTable;
-		case "crafting_table" -> craftingTable;
-		case "grindstone" -> grindStone;
-		case "stonecutter" -> stoneCutter;
-		case "cartography_table" -> cartographyTable;
-		case "loom" -> loom;
-		case "ender_chest" -> enderChest;
-		case "shulker_box" -> shulkerBox;
-		case "enchanting_table" -> enchantingTable;
-		case "anvil" -> anvil;
-		case "chipped_anvil" -> chippedAnvil;
-		case "damaged_anvil" -> damagedAnvil;
-		default -> false;
-		};
+	public static void setClickType(ClickType type) {
+		if (clickType == type) return;
+
+		clickType = type;
+		properties.setProperty(CLICK_TYPE_KEY, clickType.name());
+		storeToFile();
+	}
+
+	public static ClickType getClickType() {
+		return clickType;
+	}
+
+	private static void addItem(Identifier item, boolean allowed, boolean storeToFile) {
+		properties.setProperty(item.toString(), Boolean.toString(allowed));
+		if (def != allowed) NON_DEFAULT_BLOCK_ITEMS.add(item);
+		if (storeToFile) storeToFile();
+	}
+
+	public static void addItem(Identifier item, boolean allowed) {
+		addItem(item, allowed, true);
+	}
+
+	/**
+	 * Allows nulls
+	 */
+	public static boolean isClickTypeAllowed(ClickType clickType) {
+		return clickType==null || Config.clickType.equals(clickType);
+	}
+
+	public static boolean isBlockItemAllowed(Identifier id) {
+		return def != NON_DEFAULT_BLOCK_ITEMS.contains(id);
 	}
 }

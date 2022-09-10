@@ -16,6 +16,13 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	
+	maven {url "https://raw.githubusercontent.com/Aton-Kish/mcmod/maven"}	//ReinforcedShulker
+	maven {url "https://maven.terraformersmc.com/releases/"}	// ModMenu (Reinforced Core deps)
+	maven {url "https://maven.shedaniel.me/"}	// Cloth Config (Reinforced Core deps)
+	maven {url "https://maven.kyrptonaught.dev"}	// Quick Shulker
+	maven {url "https://maven.misterpemodder.com/libs-release"}	// Shulker Box Tooltip
+	maven {url "https://jitpack.io"; content {includeGroup "com.github.Chocohead"}}	// Fabric ASM (Shulker Box Tooltip deps)
 }
 
 dependencies {
@@ -26,6 +33,9 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
+	//Reinforced Shulkers
+	modCompileOnly "atonkish.reinfshulker:reinforced-shulker-boxes:${project.reinforced_shulker_version}"
 }
 
 processResources {
