@@ -6,7 +6,9 @@
     "AnvilScreenHandlerInvoker",
     "ServerPlayNetworkHandlerMixin",
     "ServerPlayerEntityMixin",
-    "ScreenHandlerMixin"
+    "SpecialScreenHandlerMixin",
+    "ScreenHandlerMixin",
+    "ItemStackMixin"
   ],
   "injectors": {
     "defaultRequire": 1

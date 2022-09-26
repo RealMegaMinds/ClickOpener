@@ -1,39 +1,30 @@
 package megaminds.clickopener.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import megaminds.clickopener.impl.UseAllower;
+import megaminds.clickopener.impl.Openable;
+import megaminds.clickopener.impl.StackHolder;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.screen.CartographyTableScreenHandler;
-import net.minecraft.screen.CraftingScreenHandler;
-import net.minecraft.screen.EnchantmentScreenHandler;
-import net.minecraft.screen.ForgingScreenHandler;
-import net.minecraft.screen.GrindstoneScreenHandler;
-import net.minecraft.screen.LoomScreenHandler;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerType;
-import net.minecraft.screen.StonecutterScreenHandler;
 
-@Mixin({CartographyTableScreenHandler.class, CraftingScreenHandler.class, GrindstoneScreenHandler.class, LoomScreenHandler.class, ForgingScreenHandler.class, StonecutterScreenHandler.class, EnchantmentScreenHandler.class})
-public abstract class ScreenHandlerMixin extends ScreenHandler implements UseAllower {
-	@Unique
-	private boolean allowed;
+@Mixin(ScreenHandler.class)
+public abstract class ScreenHandlerMixin implements StackHolder {
+	private ItemStack openedStack;
 
-	protected ScreenHandlerMixin(ScreenHandlerType<?> type, int syncId) {
-		super(type, syncId);
-	}
-
-	@Inject(method = "canUse(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
-	public void clickOpener_onCanUse(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-		if (allowed) info.setReturnValue(true);
+	@Inject(at = @At("RETURN"), method = "close")
+	private void clickopener_onClose(PlayerEntity player, CallbackInfo info) {
+		if (openedStack!=null) {
+			((Openable)(Object)openedStack).clickopener_close();
+			openedStack = null;
+		}
 	}
 
 	@Override
-	public void clickOpener_allowUse() {
-		this.allowed = true;
+	public void clickopener_setStack(ItemStack stack) {
+		openedStack = stack;
 	}
 }

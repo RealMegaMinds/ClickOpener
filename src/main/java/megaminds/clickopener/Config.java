@@ -1,4 +1,4 @@
-package megaminds.clickopener.util;
+package megaminds.clickopener;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-import megaminds.clickopener.ClickOpenerMod;
 import megaminds.clickopener.api.ClickType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
@@ -21,6 +20,8 @@ public class Config {
 	private static ClickType clickType;
 	private static boolean def;
 	private static Properties properties;
+	
+	private Config() {}
 
 	public static void load() {		
 		if (Files.exists(CONFIG_FILE)) {

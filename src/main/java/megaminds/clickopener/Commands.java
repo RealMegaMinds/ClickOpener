@@ -6,7 +6,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import megaminds.clickopener.api.ClickType;
-import megaminds.clickopener.util.Config;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
