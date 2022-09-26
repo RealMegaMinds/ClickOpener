@@ -56,8 +56,13 @@ public class ScreenHelper {
 
 		var syncId = openScreen(player, handler.createFactory(stack, player, inventory));
 		if (syncId.isPresent()) {
-			((Openable)(Object)stack).clickopener_open();
-			((StackHolder)player.currentScreenHandler).clickopener_setStack(stack);
+			final var h = player.currentScreenHandler;
+			((Openable)(Object)stack).clickopener_open(()->{
+				if (player.currentScreenHandler == h) {
+					player.closeHandledScreen();
+				}
+			});
+			((StackHolder)h).clickopener_setStack(stack);
 		}
 		return true;
 	}
