@@ -13,9 +13,9 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.registry.Registry;
 
 public class ScreenHelper {
 	private ScreenHelper() {}
@@ -49,7 +49,7 @@ public class ScreenHelper {
 
 	public static boolean openScreen(ServerPlayerEntity player, ClickType clickType, ItemStack stack, Inventory inventory) {
 		var item = stack.getItem();
-		if (!Config.isClickTypeAllowed(clickType) || !(item instanceof BlockItem bi) || !Config.isBlockItemAllowed(Registry.ITEM.getId(bi))) return false;
+		if (!Config.isClickTypeAllowed(clickType) || !(item instanceof BlockItem bi) || !Config.isBlockItemAllowed(Registries.ITEM.getId(bi))) return false;
 
 		var handler = HandlerRegistry.get(bi);
 		if (handler == null) return false;

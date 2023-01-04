@@ -15,6 +15,8 @@ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.text.Text;
 
 public class VanillaCompat {
+	private VanillaCompat() {}
+
 	public static void init() {
 		HandlerRegistry.register((BlockItem)Items.ENDER_CHEST, (s,p,i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()), Text.translatable("container.enderchest")));
 

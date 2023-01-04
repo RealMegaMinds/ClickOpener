@@ -13,6 +13,8 @@ import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.text.Text;
 
 public class ReinforcedShulkersCompat {
+	private ReinforcedShulkersCompat() {}
+
 	public static void init() {
 		ModItems.REINFORCED_SHULKER_BOX_MAP.entrySet().forEach(e->{
 			var material = e.getKey();
@@ -21,9 +23,7 @@ public class ReinforcedShulkersCompat {
 			var name = Text.translatable("container." + namespace + "." + material.getName() + "ShulkerBox");
 			ItemScreenHandler handler = (i,p,s)->new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->ReinforcedStorageScreenHandler.createShulkerBoxScreen(material, syncId, inventory, new ShulkerInventory(i, material.getSize(), entityType)), name);
 
-			e.getValue().values().forEach(si->{
-				HandlerRegistry.register((BlockItem)si, handler);
-			});
+			e.getValue().values().forEach(si->HandlerRegistry.register((BlockItem)si, handler));
 		});
 
 		ClickOpenerMod.LOGGER.info("Reinforced Shulker Compact Loaded");

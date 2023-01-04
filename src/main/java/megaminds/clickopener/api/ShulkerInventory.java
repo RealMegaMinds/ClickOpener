@@ -38,7 +38,7 @@ public record ShulkerInventory(ItemStack link, int size, BlockEntityType<?> enti
 
 	@Override
 	public boolean isEmpty() {
-		return !inventory.stream().anyMatch(i->i!=null&&!i.isEmpty());
+		return inventory.stream().allMatch(i->i==null||i.isEmpty());
 	}
 
 	@Override
@@ -76,11 +76,6 @@ public record ShulkerInventory(ItemStack link, int size, BlockEntityType<?> enti
 	@Override
 	public void clear() {
 		inventory.clear();
-	}
-
-	@Override
-	public int size() {
-		return size;
 	}
 
 	@Override

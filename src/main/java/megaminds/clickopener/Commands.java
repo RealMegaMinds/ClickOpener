@@ -22,19 +22,21 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.BlockItem;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.command.CommandManager.RegistrationEnvironment;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
 
 public class Commands {
-	private static final SuggestionProvider<ServerCommandSource> BLOCK_ITEM_SUGGESTIONS = (context, builder) -> {
-		return CommandSource.suggestIdentifiers(Registry.ITEM.stream().filter(i->i instanceof BlockItem).map(Registry.ITEM::getId), builder);
-	};
-	private static final SuggestionProvider<ServerCommandSource> CLICK_TYPE_SUGGESTIONS = (context, builder) -> {
-		return CommandSource.suggestMatching(Arrays.stream(ClickType.values()).filter(c->!ClickType.OTHER.equals(c)).map(Enum::name), builder);
-	};
+	private static final SuggestionProvider<ServerCommandSource> BLOCK_ITEM_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.ITEM.stream().filter(BlockItem.class::isInstance).map(Registries.ITEM::getId), builder);
+	private static final SuggestionProvider<ServerCommandSource> CLICK_TYPE_SUGGESTIONS = (context, builder) -> CommandSource.suggestMatching(Arrays.stream(ClickType.values()).filter(c->!ClickType.OTHER.equals(c)).map(Enum::name), builder);
+	private static final String ENABLED = "enabled";
+	private static final String CLICK_TYPE = "clickType";
+	private static final String DEFAULT = "default";
+	
+	private Commands() {}
 
+	@SuppressWarnings("java:S1172")
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, RegistrationEnvironment environment) {
 		var root = literal(ClickOpenerMod.MODID)
 				.requires(s->s.hasPermissionLevel(4));
@@ -45,20 +47,20 @@ public class Commands {
 		var entry = literal("entry")
 				.then(argument("item", identifier())
 						.suggests(BLOCK_ITEM_SUGGESTIONS)
-						.then(argument("enabled", bool())
+						.then(argument(ENABLED, bool())
 								.executes(Commands::entry)))
 				.then(literal("inhand")
-						.then(argument("enabled", bool())
-								.requires(s->s.isExecutedByPlayer())
+						.then(argument(ENABLED, bool())
+								.requires(ServerCommandSource::isExecutedByPlayer)
 								.executes(Commands::entryNoItem)));
 
-		var clickType = literal("clickType")
-				.then(argument("clickType", word())
+		var clickType = literal(CLICK_TYPE)
+				.then(argument(CLICK_TYPE, word())
 						.suggests(CLICK_TYPE_SUGGESTIONS)
 						.executes(Commands::clickType));
 
-		var def = literal("default")
-				.then(argument("default", bool())
+		var def = literal(DEFAULT)
+				.then(argument(DEFAULT, bool())
 						.executes(Commands::def));
 
 		root.then(reload);
@@ -69,14 +71,14 @@ public class Commands {
 	}
 
 	private static int def(CommandContext<ServerCommandSource> context) {
-		var def = getBool(context, "default");
+		var def = getBool(context, DEFAULT);
 		Config.setDefault(def);
 		context.getSource().sendFeedback(Text.of("Default set to "+def), false);
 		return 1;
 	}
 
 	private static int clickType(CommandContext<ServerCommandSource> context) {
-		var type = ClickType.tryValueOf(getString(context, "clickType"), ClickType.OTHER);
+		var type = ClickType.tryValueOf(getString(context, CLICK_TYPE), ClickType.OTHER);
 		if (ClickType.OTHER.equals(type)) {
 			context.getSource().sendError(Text.of("Invalid ClickType"));
 			return 0;
@@ -100,8 +102,8 @@ public class Commands {
 			return 0;
 		}
 
-		var id = Registry.ITEM.getId(item);
-		var enabled = getBool(context, "enabled");
+		var id = Registries.ITEM.getId(item);
+		var enabled = getBool(context, ENABLED);
 		Config.addItem(id, enabled);
 		context.getSource().sendFeedback(Text.of(id+(enabled ? " enabled" : " disabled")), false);
 		return 1;
@@ -109,12 +111,12 @@ public class Commands {
 
 	private static int entry(CommandContext<ServerCommandSource> context) {
 		var item = getIdentifier(context, "item");
-		if (!(Registry.ITEM.get(item) instanceof BlockItem)) {
+		if (!(Registries.ITEM.get(item) instanceof BlockItem)) {
 			context.getSource().sendError(Text.of("Item must be a BlockItem"));
 			return 0;
 		}
 
-		var enabled = getBool(context, "enabled");
+		var enabled = getBool(context, ENABLED);
 		Config.addItem(item, enabled);
 		context.getSource().sendFeedback(Text.of(item+(enabled ? " enabled" : " disabled")), false);
 		return 1;

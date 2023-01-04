@@ -25,7 +25,6 @@ repositories {
 	maven {url "https://maven.kyrptonaught.dev"}	// Quick Shulker
 	maven {url "https://www.cursemaven.com"; content {includeGroup "curse.maven"}} //Quick Shulker (workaround)
 	maven {url "https://maven.misterpemodder.com/libs-release"}	// Shulker Box Tooltip
-//	maven {url "https://jitpack.io"; content {includeGroup "com.github.Chocohead"}}	// Fabric ASM (Shulker Box Tooltip deps)
 }
 
 dependencies {

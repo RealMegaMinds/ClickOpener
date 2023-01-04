@@ -12,6 +12,8 @@ public class HandlerRegistry {
 	private static final Map<BlockItem, ItemScreenHandler> ITEM_SCREEN_HANDLERS = new HashMap<>();
 	private static boolean handlersLoaded = false;
 
+	private HandlerRegistry() {}
+
 	public static void register(BlockItem item, ItemScreenHandler handler) {
 		ITEM_SCREEN_HANDLERS.put(item, handler);
 	}

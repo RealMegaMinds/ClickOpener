@@ -18,9 +18,14 @@ public enum ClickType implements StringIdentifiable {
 		return switch (action) {
 		case PICKUP -> button == 0 ? LEFT : RIGHT;
 		case QUICK_MOVE -> button == 0 ? SHIFT_LEFT : SHIFT_RIGHT;
-		case THROW ->  slot == -999 ? OTHER : (button == 0 ? DROP : CTRL_DROP);
+		case THROW ->  evalThrow(slot, button);
 		default -> OTHER;
 		};
+	}
+
+	private static ClickType evalThrow(int slot, int button) {
+		if (slot == -99) return OTHER;
+		return button == 0 ? DROP : CTRL_DROP;
 	}
 
 	public static ClickType tryValueOf(String s, ClickType def) {

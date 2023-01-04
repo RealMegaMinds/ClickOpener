@@ -27,7 +27,6 @@ public class InventoryHelper {
 			} else if (canStackAddMore(existingStack, stack, inventory.getMaxCountPerStack())) {
 				existingStack.increment(1);
 				slot = i;
-				break;
 			}
 		}
 
