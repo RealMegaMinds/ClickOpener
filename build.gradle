@@ -18,11 +18,14 @@ repositories {
 	// for more information about repositories.
 	
 	maven {url "https://raw.githubusercontent.com/Aton-Kish/mcmod/maven"}	//ReinforcedShulker
+	
+	//Notes from ReinforcedShulker build.gradle
 	maven {url "https://maven.terraformersmc.com/releases/"}	// ModMenu (Reinforced Core deps)
 	maven {url "https://maven.shedaniel.me/"}	// Cloth Config (Reinforced Core deps)
 	maven {url "https://maven.kyrptonaught.dev"}	// Quick Shulker
+	maven {url "https://www.cursemaven.com"; content {includeGroup "curse.maven"}} //Quick Shulker (workaround)
 	maven {url "https://maven.misterpemodder.com/libs-release"}	// Shulker Box Tooltip
-	maven {url "https://jitpack.io"; content {includeGroup "com.github.Chocohead"}}	// Fabric ASM (Shulker Box Tooltip deps)
+//	maven {url "https://jitpack.io"; content {includeGroup "com.github.Chocohead"}}	// Fabric ASM (Shulker Box Tooltip deps)
 }
 
 dependencies {
