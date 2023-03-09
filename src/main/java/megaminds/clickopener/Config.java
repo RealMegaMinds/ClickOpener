@@ -58,7 +58,7 @@ public class Config {
 	private static void loadFromProperties() {
 		clickType = ClickType.tryValueOf((String)properties.computeIfAbsent(CLICK_TYPE_KEY, k->ClickType.RIGHT.name()), ClickType.RIGHT);
 		def = Boolean.parseBoolean((String)properties.computeIfAbsent(DEFAULT_KEY, k->"false"));
-
+		readBlocks();
 	}
 
 	private static void readBlocks() {
