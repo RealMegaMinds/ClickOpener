@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.0-SNAPSHOT'
+	id 'fabric-loom' version '1.2-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -38,6 +38,7 @@ dependencies {
 	
 	//Reinforced Shulkers
 	modCompileOnly "atonkish.reinfshulker:reinforced-shulker-boxes:${project.reinforced_shulker_version}"
+	modCompileOnly "atonkish.reinfcore:reinforced-core:${project.reinforced_core_version}"
 }
 
 processResources {
