@@ -5,14 +5,13 @@ import java.util.OptionalInt;
 import megaminds.clickopener.Config;
 import megaminds.clickopener.api.ClickType;
 import megaminds.clickopener.api.HandlerRegistry;
-import megaminds.clickopener.impl.CloseIgnorer;
 import megaminds.clickopener.impl.Openable;
 import megaminds.clickopener.impl.StackHolder;
 import megaminds.clickopener.impl.UseAllower;
+import megaminds.clickopener.screenhandlers.WrappedFactory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -20,31 +19,25 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public class ScreenHelper {
 	private ScreenHelper() {}
 
-	public static OptionalInt openScreen(ServerPlayerEntity player, NamedScreenHandlerFactory fac) {		
+	public static OptionalInt openScreen(ServerPlayerEntity player, NamedScreenHandlerFactory fac) {
+		//Save the cursor stack so it can be restored later and let player know we took the cursor stack
 		var cursorStack = player.currentScreenHandler.getCursorStack();
 		player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
-		syncCursor(player);	//Stops ghost item
+		player.currentScreenHandler.syncState();	//also reverts picking up the item
 
-		if (player.currentScreenHandler!=player.playerScreenHandler) {
-			((CloseIgnorer)player).clickOpener_ignoreNextClose();	//ensures mouse doesn't reset
-		} else {
-			player.closeScreenHandler();
-		}
+		//Open the inventory (wrap so cursor doesn't reset)
+		var syncId = player.openHandledScreen(WrappedFactory.wrap(fac));
 
-		var syncId = player.openHandledScreen(fac);
-
+		//Allow special inventories to work (ones that normally require a block in the world)
 		if (player.currentScreenHandler instanceof UseAllower a) {
 			a.clickOpener_allowUse();
 		}
 
-		player.currentScreenHandler.setCursorStack(cursorStack);	//set cursor stack in current screen to what it was in the old one
-		syncCursor(player);
+		//Restore the cursor stack and let player know
+		player.currentScreenHandler.setCursorStack(cursorStack);
+		player.currentScreenHandler.syncState();
 
 		return syncId;
-	}
-
-	public static void syncCursor(ServerPlayerEntity player) {
-		player.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(-1, player.currentScreenHandler.nextRevision(), -1, player.currentScreenHandler.getCursorStack().copy()));
 	}
 
 	public static boolean openScreen(ServerPlayerEntity player, ClickType clickType, ItemStack stack, Inventory inventory) {

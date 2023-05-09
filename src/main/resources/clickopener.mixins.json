@@ -5,7 +5,6 @@
   "mixins": [
     "AnvilScreenHandlerInvoker",
     "ServerPlayNetworkHandlerMixin",
-    "ServerPlayerEntityMixin",
     "SpecialScreenHandlerMixin",
     "ScreenHandlerMixin",
     "ItemStackMixin"
