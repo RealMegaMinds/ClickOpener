@@ -25,25 +25,16 @@ public class Config {
 
 	public static void load() {		
 		if (Files.exists(CONFIG_FILE)) {
-			loadFromFile();
+			loadPropertiesFromFile();
 		} else {
-			createFile();
+			properties = new Properties();
 		}
 
+		loadFromProperties();
 		storeToFile();	//Ensures defaults show
 	}
 
-	private static void createFile() {
-		try {
-			Files.createFile(CONFIG_FILE);
-		} catch (IOException e) {
-			ClickOpenerMod.LOGGER.error("Failed to create configuration file");
-			e.printStackTrace();
-		}
-		properties = new Properties();
-	}
-
-	private static void loadFromFile() {
+	private static void loadPropertiesFromFile() {
 		Properties properties = new Properties();
 		try (var in = Files.newInputStream(CONFIG_FILE)) {
 			properties.load(in);
@@ -52,7 +43,6 @@ public class Config {
 			e.printStackTrace();
 		}
 		Config.properties = properties;
-		loadFromProperties();
 	}
 
 	private static void loadFromProperties() {
