@@ -18,8 +18,8 @@ public record ShulkerInventory(ItemStack link, int size, BlockEntityType<?> enti
 		if (blockNbt!=null) Inventories.readNbt(blockNbt, inventory);
 	}
 
-	private NbtCompound writeNbt() {
-		return Inventories.writeNbt(new NbtCompound(), this.inventory, false);
+	private NbtCompound writeItemsNbt(NbtCompound blockEntityTag) {
+		return Inventories.writeNbt(blockEntityTag, this.inventory, false);
 	}
 
 	@Override
@@ -33,7 +33,14 @@ public record ShulkerInventory(ItemStack link, int size, BlockEntityType<?> enti
 	}
 
 	private void writeData() {
-		BlockItem.setBlockEntityNbt(link, entityType, writeNbt());
+		if (isEmpty()) {
+			var blockTag = link.getSubNbt(BlockItem.BLOCK_ENTITY_TAG_KEY);
+			if (blockTag != null) {
+				blockTag.remove(ITEMS_KEY);
+			}
+		} else {
+			writeItemsNbt(link.getOrCreateSubNbt(BlockItem.BLOCK_ENTITY_TAG_KEY));
+		}
 	}
 
 	@Override
