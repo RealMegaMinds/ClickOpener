@@ -73,7 +73,7 @@ public class Commands {
 	private static int def(CommandContext<ServerCommandSource> context) {
 		var def = getBool(context, DEFAULT);
 		Config.setDefault(def);
-		context.getSource().sendFeedback(Text.of("Default set to "+def), false);
+		context.getSource().sendFeedback(() -> Text.of("Default set to "+def), false);
 		return 1;
 	}
 
@@ -85,13 +85,13 @@ public class Commands {
 		}
 
 		Config.setClickType(type);
-		context.getSource().sendFeedback(Text.of("ClickType set to "+type), false);
+		context.getSource().sendFeedback(() -> Text.of("ClickType set to "+type), false);
 		return 1;
 	}
 
 	private static int reload(CommandContext<ServerCommandSource> context) {
 		Config.load();
-		context.getSource().sendFeedback(Text.of("ClickOpener Config Reloaded"), false);
+		context.getSource().sendFeedback(() -> Text.of("ClickOpener Config Reloaded"), false);
 		return 1;
 	}
 
@@ -105,7 +105,7 @@ public class Commands {
 		var id = Registries.ITEM.getId(item);
 		var enabled = getBool(context, ENABLED);
 		Config.addItem(id, enabled);
-		context.getSource().sendFeedback(Text.of(id+(enabled ? " enabled" : " disabled")), false);
+		context.getSource().sendFeedback(() -> Text.of(id+(enabled ? " enabled" : " disabled")), false);
 		return 1;
 	}
 
@@ -118,7 +118,7 @@ public class Commands {
 
 		var enabled = getBool(context, ENABLED);
 		Config.addItem(item, enabled);
-		context.getSource().sendFeedback(Text.of(item+(enabled ? " enabled" : " disabled")), false);
+		context.getSource().sendFeedback(() -> Text.of(item+(enabled ? " enabled" : " disabled")), false);
 		return 1;
 	}
 }
