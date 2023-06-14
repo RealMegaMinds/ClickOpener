@@ -18,11 +18,11 @@ public class VanillaCompat {
 	private VanillaCompat() {}
 
 	public static void init() {
-		HandlerRegistry.register((BlockItem)Items.ENDER_CHEST, (s,p,i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()), Text.translatable("container.enderchest")));
+		HandlerRegistry.register((BlockItem)Items.ENDER_CHEST, (s, p, i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()), Text.translatable("container.enderchest")));
 
-		HandlerRegistry.register((BlockItem)Items.ENCHANTING_TABLE, (s,p,i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new EnchantmentScreenHandler(syncId, inventory, ScreenHandlerContext.create(player.getWorld(), player.getBlockPos())), s.getName()));
+		HandlerRegistry.register((BlockItem)Items.ENCHANTING_TABLE, (stack, p, i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new EnchantmentScreenHandler(syncId, inventory, ScreenHandlerContext.create(player.getWorld(), player.getBlockPos())), stack.getName()));
 
-		ItemScreenHandler stateHandler = (s,p,i) -> ((BlockItem)s.getItem()).getBlock().getDefaultState().createScreenHandlerFactory(p.getWorld(), p.getBlockPos());
+		ItemScreenHandler stateHandler = (stack, player, i) -> ((BlockItem)stack.getItem()).getBlock().getDefaultState().createScreenHandlerFactory(player.getWorld(), player.getBlockPos());
 		HandlerRegistry.register((BlockItem)Items.CARTOGRAPHY_TABLE, stateHandler);
 		HandlerRegistry.register((BlockItem)Items.CRAFTING_TABLE, stateHandler);
 		HandlerRegistry.register((BlockItem)Items.GRINDSTONE, stateHandler);
@@ -30,7 +30,7 @@ public class VanillaCompat {
 		HandlerRegistry.register((BlockItem)Items.SMITHING_TABLE, stateHandler);
 		HandlerRegistry.register((BlockItem)Items.STONECUTTER, stateHandler);
 
-		ItemScreenHandler anvilHandler = (s,p,i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new AnvilItemScreenHandler(syncId, inventory, ScreenHandlerContext.create(player.getWorld(), player.getBlockPos()), i, s), Text.translatable("container.repair"));
+		ItemScreenHandler anvilHandler = (stack, p, inv) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new AnvilItemScreenHandler(syncId, inventory, ScreenHandlerContext.create(player.getWorld(), player.getBlockPos()), inv, stack), Text.translatable("container.repair"));
 		HandlerRegistry.register((BlockItem)Items.ANVIL, anvilHandler);
 		HandlerRegistry.register((BlockItem)Items.CHIPPED_ANVIL, anvilHandler);
 		HandlerRegistry.register((BlockItem)Items.DAMAGED_ANVIL, anvilHandler);
