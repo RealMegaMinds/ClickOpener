@@ -21,7 +21,7 @@ public class ReinforcedShulkersCompat {
 			var entityType = ModBlockEntityType.REINFORCED_SHULKER_BOX_MAP.get(material);
 			var namespace = BlockEntityType.getId(entityType).getNamespace();
 			var name = Text.translatable("container." + namespace + "." + material.getName() + "ShulkerBox");
-			ItemScreenHandler handler = (i,p,s)->new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->ReinforcedStorageScreenHandler.createShulkerBoxScreen(material, syncId, inventory, new ShulkerInventory(i, material.getSize(), entityType)), name);
+			var handler = ItemScreenHandler.requireSingleStack((i,p,s)->new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->ReinforcedStorageScreenHandler.createShulkerBoxScreen(material, syncId, inventory, new ShulkerInventory(i, material.getSize(), entityType)), name));
 
 			e.getValue().values().forEach(si->HandlerRegistry.register((BlockItem)si, handler));
 		});

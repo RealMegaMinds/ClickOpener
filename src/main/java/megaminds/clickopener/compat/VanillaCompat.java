@@ -35,7 +35,7 @@ public class VanillaCompat {
 		HandlerRegistry.register((BlockItem)Items.CHIPPED_ANVIL, anvilHandler);
 		HandlerRegistry.register((BlockItem)Items.DAMAGED_ANVIL, anvilHandler);
 
-		ItemScreenHandler shulkerHandler = (s,p,i)->new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new ShulkerBoxScreenHandler(syncId, inventory, new ShulkerInventory(s, 27, BlockEntityType.SHULKER_BOX)), s.hasCustomName() ? s.getName() : Text.translatable("container.shulkerBox"));
+		var shulkerHandler = ItemScreenHandler.requireSingleStack((stack, p, i)->new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new ShulkerBoxScreenHandler(syncId, inventory, new ShulkerInventory(stack, 27, BlockEntityType.SHULKER_BOX)), stack.hasCustomName() ? stack.getName() : Text.translatable("container.shulkerBox")));
 		HandlerRegistry.register((BlockItem)Items.SHULKER_BOX, shulkerHandler);
 		HandlerRegistry.register((BlockItem)Items.BLACK_SHULKER_BOX, shulkerHandler);
 		HandlerRegistry.register((BlockItem)Items.BLUE_SHULKER_BOX, shulkerHandler);

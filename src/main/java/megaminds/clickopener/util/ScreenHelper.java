@@ -45,7 +45,7 @@ public class ScreenHelper {
 		if (!Config.isClickTypeAllowed(clickType) || !(item instanceof BlockItem bi) || !Config.isBlockItemAllowed(Registries.ITEM.getId(bi))) return false;
 
 		var handler = HandlerRegistry.get(bi);
-		if (handler == null) return false;
+		if (handler == null || !handler.canCreateFactory(stack, player, inventory)) return false;
 
 		var syncId = openScreen(player, handler.createFactory(stack, player, inventory));
 		if (syncId.isPresent()) {
