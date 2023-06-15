@@ -26,6 +26,6 @@ public class ReinforcedShulkersCompat {
 			e.getValue().values().forEach(si->HandlerRegistry.register((BlockItem)si, handler));
 		});
 
-		ClickOpenerMod.LOGGER.info("Reinforced Shulker Compact Loaded");
+		ClickOpenerMod.LOGGER.info("Reinforced Shulker Compat Loaded");
 	}
 }
