@@ -8,6 +8,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 public interface ItemScreenHandler {
 	NamedScreenHandlerFactory createFactory(ItemStack stack, ServerPlayerEntity player, Inventory inventory);
 
+	@SuppressWarnings("unused")
 	default boolean canCreateFactory(ItemStack stack, ServerPlayerEntity player, Inventory inventory) {
 		return true;
 	}

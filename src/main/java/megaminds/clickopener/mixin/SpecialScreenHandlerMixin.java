@@ -27,6 +27,7 @@ public abstract class SpecialScreenHandlerMixin extends ScreenHandler implements
 		super(type, syncId);
 	}
 
+	@SuppressWarnings("unused")
 	@Inject(method = "canUse(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
 	public void clickOpener_onCanUse(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
 		if (allowed) info.setReturnValue(true);

@@ -33,10 +33,10 @@ public class Commands {
 	private static final String ENABLED = "enabled";
 	private static final String CLICK_TYPE = "clickType";
 	private static final String DEFAULT = "default";
-	
+
 	private Commands() {}
 
-	@SuppressWarnings("java:S1172")
+	@SuppressWarnings({"java:S1172", "unused"})
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, RegistrationEnvironment environment) {
 		var root = literal(ClickOpenerMod.MODID)
 				.requires(s->s.hasPermissionLevel(4));

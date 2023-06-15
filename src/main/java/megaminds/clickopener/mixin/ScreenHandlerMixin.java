@@ -15,6 +15,7 @@ import net.minecraft.screen.ScreenHandler;
 public abstract class ScreenHandlerMixin implements StackHolder {
 	private ItemStack openedStack;
 
+	@SuppressWarnings("unused")
 	@Inject(at = @At("RETURN"), method = "onClosed")
 	private void clickopener_onClose(PlayerEntity player, CallbackInfo info) {
 		if (openedStack!=null) {

@@ -53,13 +53,13 @@ public class AnvilItemScreenHandler extends AnvilScreenHandler {
 					((ServerPlayerEntity)player).closeHandledScreen();
 					world.syncWorldEvent(WorldEvents.ANVIL_DESTROYED, pos, 0);
 					return;
+				}
+
+				var pair = addToInventory(next);
+				if (pair!=null) {	//Anvil fits
+					ScreenHelper.openScreen((ServerPlayerEntity)player, null, pair.left(), pair.right());
 				} else {
-					var pair = addToInventory(next);
-					if (pair!=null) {	//Anvil fits
-						ScreenHelper.openScreen((ServerPlayerEntity)player, null, pair.left(), pair.right());
-					} else {
-						((ServerPlayerEntity)player).closeHandledScreen();
-					}
+					((ServerPlayerEntity)player).closeHandledScreen();
 				}
 			}
 			world.syncWorldEvent(WorldEvents.ANVIL_USED, pos, 0);

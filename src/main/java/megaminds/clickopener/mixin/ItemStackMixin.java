@@ -18,6 +18,7 @@ public abstract class ItemStackMixin implements Openable {
 	@Unique
 	private Runnable closer;
 
+	@SuppressWarnings("unused")
 	@Inject(at = @At("RETURN"), method = "setCount")
 	private void clickopener_onSetCount(int count, CallbackInfo info) {
 		if (isEmpty() && closer!=null) {
