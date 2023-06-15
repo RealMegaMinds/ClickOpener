@@ -4,11 +4,12 @@ import megaminds.clickopener.api.HandlerRegistry;
 import megaminds.clickopener.api.ItemScreenHandler;
 import megaminds.clickopener.api.ShulkerInventory;
 import megaminds.clickopener.screenhandlers.AnvilItemScreenHandler;
+import megaminds.clickopener.util.ScreenHelper;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 import net.minecraft.screen.EnchantmentScreenHandler;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
@@ -18,7 +19,7 @@ public class VanillaCompat {
 	private VanillaCompat() {}
 
 	public static void init() {
-		HandlerRegistry.register((BlockItem)Items.ENDER_CHEST, (s, p, i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->GenericContainerScreenHandler.createGeneric9x3(syncId, inventory, player.getEnderChestInventory()), Text.translatable("container.enderchest")));
+		HandlerRegistry.register((BlockItem)Items.ENDER_CHEST, (s, p, i) -> new SimpleNamedScreenHandlerFactory(ScreenHelper.genericScreenHandlerFactoryFor(PlayerEntity::getEnderChestInventory), Text.translatable("container.enderchest")));
 
 		HandlerRegistry.register((BlockItem)Items.ENCHANTING_TABLE, (stack, p, i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new EnchantmentScreenHandler(syncId, inventory, ScreenHandlerContext.create(player.getWorld(), player.getBlockPos())), stack.getName()));
 
