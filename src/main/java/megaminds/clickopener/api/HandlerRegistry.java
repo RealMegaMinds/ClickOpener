@@ -3,34 +3,29 @@ package megaminds.clickopener.api;
 import java.util.HashMap;
 import java.util.Map;
 
-import megaminds.clickopener.compat.ReinforcedShulkersCompat;
-import megaminds.clickopener.compat.VanillaCompat;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.item.BlockItem;
+import net.minecraft.server.MinecraftServer;
 
 public class HandlerRegistry {
 	private static final Map<BlockItem, ItemScreenHandler> ITEM_SCREEN_HANDLERS = new HashMap<>();
-	private static boolean handlersLoaded = false;
 
 	private HandlerRegistry() {}
 
-	public static void register(BlockItem item, ItemScreenHandler handler) {
+	/**
+	 * If in singleplayer, this only loads for the first server.
+	 */
+	@SuppressWarnings("unused")
+	public static void onServerLoading(MinecraftServer server) {
+		if (ITEM_SCREEN_HANDLERS.isEmpty()) {
+			HandlerRegisterEvent.EVENT.invoker().onRegister(HandlerRegistry::register);
+		}
+	}
+
+	private static void register(BlockItem item, ItemScreenHandler handler) {
 		ITEM_SCREEN_HANDLERS.put(item, handler);
 	}
 
 	public static ItemScreenHandler get(BlockItem item) {
-		if (!handlersLoaded) loadHandlers();
 		return ITEM_SCREEN_HANDLERS.get(item);
-	}
-
-
-	private static void loadHandlers() {
-		VanillaCompat.init();
-
-		if (FabricLoader.getInstance().isModLoaded("reinfshulker")) {
-			ReinforcedShulkersCompat.init();
-		}
-
-		handlersLoaded = true;
 	}
 }
