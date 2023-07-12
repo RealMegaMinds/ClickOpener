@@ -47,7 +47,7 @@ public class ScreenHelper {
 
 	public static boolean openScreen(ServerPlayerEntity player, ClickType clickType, ItemStack stack, Inventory inventory) {
 		var item = stack.getItem();
-		if (/*TODO !Config.isClickTypeAllowed(clickType)*/!(item instanceof BlockItem bi) || !ClickOpenerMod.CONFIG.isAllowed(bi)) return false;
+		if (!ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(player, clickType) || !(item instanceof BlockItem bi) || !ClickOpenerMod.CONFIG.isAllowed(bi)) return false;
 
 		var handler = HandlerRegistry.get(bi);
 		if (handler == null || !handler.canCreateFactory(stack, player, inventory)) return false;

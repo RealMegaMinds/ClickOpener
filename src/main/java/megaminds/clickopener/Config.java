@@ -6,11 +6,8 @@ import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
-import megaminds.clickopener.util.IdentifierAdapter;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
@@ -34,11 +31,6 @@ import net.minecraft.util.Identifier;
  */
 public class Config {
 	public static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve(ClickOpenerMod.MODID+".json");
-	private static final Gson GSON = new GsonBuilder()
-			.registerTypeAdapter(Identifier.class, new IdentifierAdapter())
-			.setPrettyPrinting()
-			.disableHtmlEscaping()
-			.create();
 
 	private boolean whitelist;
 	private final Set<TagKey<Item>> itemTagsList;
@@ -51,27 +43,27 @@ public class Config {
 	public Config() {
 		this(true);
 	}
-	
+
 	public boolean isWhitelist() {
 		return whitelist;
 	}
-	
+
 	public Set<TagKey<Item>> getItemTagsList() {
 		return itemTagsList;
 	}
-	
+
 	public Set<TagKey<Block>> getBlockTagsList() {
 		return blockTagsList;
 	}
-	
+
 	public Set<Identifier> getIdList() {
 		return idList;
 	}
-	
+
 	public Set<Identifier> getExceptions() {
 		return exceptions;
 	}
-	
+
 	public void setWhitelist(boolean whitelist) {
 		this.whitelist = whitelist;
 	}
@@ -97,7 +89,12 @@ public class Config {
 	}
 
 	public void reload() {
-		if (!Files.exists(CONFIG_FILE) || !read()) {
+		if (Files.exists(CONFIG_FILE)) {
+			if (!read()) {
+				//Don't write. Allow the user a chance to recover.
+				return;
+			}
+		} else {
 			reset();
 		}
 		write();
@@ -105,22 +102,18 @@ public class Config {
 
 	public boolean read() {
 		try (var reader = Files.newBufferedReader(CONFIG_FILE)) {
-			var builder = GSON.fromJson(reader, ConfigBuilder.class);
-			if (builder != null) {
-				builder.fill(this);
-				return true;
-			}
+			ClickOpenerMod.GSON.fromJson(reader, ConfigBuilder.class).fill(this);
+			return true;
 		} catch (IOException | JsonParseException e) {
 			ClickOpenerMod.LOGGER.error("Failed to read configuration file: {}", e.getMessage());
 		}
-
 		return false;
 	}
 
 	public void write() {
 		var builder = new ConfigBuilder(this);
 		try (var out = Files.newBufferedWriter(CONFIG_FILE)) {
-			GSON.toJson(builder, out);
+			ClickOpenerMod.GSON.toJson(builder, out);
 		} catch (IOException | JsonIOException e) {
 			ClickOpenerMod.LOGGER.error("Failed to write configuration file: {}", e.getMessage());
 			ClickOpenerMod.LOGGER.error("Current Contents: {}", builder);
@@ -139,7 +132,7 @@ public class Config {
 	public void addBlockItem(Identifier id, boolean list) {
 		addBlockItem(id, list, true);
 	}
-	
+
 	public void removeBlockItem(Identifier id, boolean list, boolean storeToFile) {
 		if (list) {
 			idList.remove(id);
@@ -148,7 +141,7 @@ public class Config {
 		}
 		if (storeToFile) write();
 	}
-	
+
 	public void removeBlockItem(Identifier id, boolean list) {
 		removeBlockItem(id, list, true);
 	}
