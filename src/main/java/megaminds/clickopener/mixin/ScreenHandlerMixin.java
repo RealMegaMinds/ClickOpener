@@ -1,6 +1,7 @@
 package megaminds.clickopener.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -13,19 +14,26 @@ import net.minecraft.screen.ScreenHandler;
 
 @Mixin(ScreenHandler.class)
 public abstract class ScreenHandlerMixin implements StackHolder {
-	private ItemStack openedStack;
+	@Unique
+	@SuppressWarnings("java:S116")
+	private ItemStack clickopener$openStack;
 
 	@SuppressWarnings("unused")
 	@Inject(at = @At("RETURN"), method = "onClosed")
-	private void clickopener_onClose(PlayerEntity player, CallbackInfo info) {
-		if (openedStack!=null) {
-			((Openable)(Object)openedStack).clickopener$clearCloser();
-			openedStack = null;
+	private void clickopener$onClose(PlayerEntity player, CallbackInfo info) {
+		if (clickopener$hasOpenStack()) {
+			((Openable)(Object)clickopener$openStack).clickopener$clearCloser();
+			clickopener$openStack = null;
 		}
 	}
 
 	@Override
-	public void clickopener_setStack(ItemStack stack) {
-		openedStack = stack;
+	public void clickopener$setOpenStack(ItemStack stack) {
+		clickopener$openStack = stack;
+	}
+
+	@Override
+	public boolean clickopener$hasOpenStack() {
+		return clickopener$openStack != null;
 	}
 }

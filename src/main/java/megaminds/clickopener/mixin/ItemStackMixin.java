@@ -16,30 +16,26 @@ public abstract class ItemStackMixin implements Openable {
 	public abstract boolean isEmpty();
 
 	@Unique
-	private Runnable closer;
+	@SuppressWarnings("java:S116")
+	private Runnable clickopener$closer;
 
 	@SuppressWarnings("unused")
 	@Inject(at = @At("RETURN"), method = "setCount")
-	private void clickopener_onSetCount(int count, CallbackInfo info) {
-		if (isEmpty() && closer!=null) {
-			var tmp = closer;
-			closer = null;
+	private void clickopener$onSetCount(int count, CallbackInfo info) {
+		if (isEmpty() && clickopener$hasCloser()) {
+			var tmp = clickopener$closer;
+			clickopener$clearCloser();
 			tmp.run();
 		}
 	}
 
 	@Override
 	public void clickopener$setCloser(Runnable closer) {
-		this.closer = closer;
+		this.clickopener$closer = closer;
 	}
 
 	@Override
 	public boolean clickopener$hasCloser() {
-		return closer != null;
-	}
-
-	@Override
-	public void clickopener$clearCloser() {
-		closer = null;
+		return clickopener$closer != null;
 	}
 }

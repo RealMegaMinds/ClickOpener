@@ -60,7 +60,7 @@ public class ScreenHelper {
 					player.closeHandledScreen();
 				}
 			});
-			((StackHolder)h).clickopener_setStack(stack);
+			((StackHolder)h).clickopener$setOpenStack(stack);
 		}
 		return true;
 	}
