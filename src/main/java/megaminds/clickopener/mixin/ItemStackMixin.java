@@ -29,17 +29,17 @@ public abstract class ItemStackMixin implements Openable {
 	}
 
 	@Override
-	public void clickopener_open(Runnable closer) {
+	public void clickopener$setCloser(Runnable closer) {
 		this.closer = closer;
 	}
 
 	@Override
-	public boolean clickopener_isOpen() {
+	public boolean clickopener$hasCloser() {
 		return closer != null;
 	}
 
 	@Override
-	public void clickopener_close() {
+	public void clickopener$clearCloser() {
 		closer = null;
 	}
 }

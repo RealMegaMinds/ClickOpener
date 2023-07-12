@@ -30,7 +30,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
 		var slot = player.currentScreenHandler.getSlot(s);
 		var stack = slot.getStack();
-		if (stack!=null && ((Openable)(Object)stack).clickopener_isOpen()) {
+		if (stack!=null && ((Openable)(Object)stack).clickopener$hasCloser()) {
 			//Do nothing/revert picking up the item
 			player.currentScreenHandler.syncState();
 			info.cancel();
@@ -44,7 +44,7 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		}
 
 		if (ScreenHelper.openScreen(player, clickType, stack, slot.inventory)) {
-			//Successfully opened, so don't do anthing else
+			//Successfully opened, so don't do anything else
 			info.cancel();
 		}//else Minecraft default handling
 	}	

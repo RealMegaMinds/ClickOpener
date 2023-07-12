@@ -19,7 +19,7 @@ public abstract class ScreenHandlerMixin implements StackHolder {
 	@Inject(at = @At("RETURN"), method = "onClosed")
 	private void clickopener_onClose(PlayerEntity player, CallbackInfo info) {
 		if (openedStack!=null) {
-			((Openable)(Object)openedStack).clickopener_close();
+			((Openable)(Object)openedStack).clickopener$clearCloser();
 			openedStack = null;
 		}
 	}

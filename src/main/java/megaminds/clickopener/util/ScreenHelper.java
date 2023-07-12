@@ -55,7 +55,7 @@ public class ScreenHelper {
 		var syncId = openScreen(player, handler.createFactory(stack, player, inventory));
 		if (syncId.isPresent()) {
 			final var h = player.currentScreenHandler;
-			((Openable)(Object)stack).clickopener_open(()->{
+			((Openable)(Object)stack).clickopener$setCloser(()->{
 				if (player.currentScreenHandler == h) {
 					player.closeHandledScreen();
 				}
