@@ -1,11 +1,11 @@
 package megaminds.clickopener.util;
 
-import java.util.OptionalInt;
 import java.util.function.Function;
 
 import megaminds.clickopener.ClickOpenerMod;
 import megaminds.clickopener.api.ClickType;
 import megaminds.clickopener.api.HandlerRegistry;
+import megaminds.clickopener.api.ItemScreenOpener;
 import megaminds.clickopener.impl.Openable;
 import megaminds.clickopener.impl.StackHolder;
 import megaminds.clickopener.impl.UseAllower;
@@ -24,17 +24,17 @@ import net.minecraft.util.Identifier;
 public class ScreenHelper {
 	private ScreenHelper() {}
 
-	public static OptionalInt openScreen(ServerPlayerEntity player, NamedScreenHandlerFactory fac) {
+	public static boolean openScreen(ServerPlayerEntity player, ItemStack stack, Inventory inventory, ItemScreenOpener opener) {
 		//Save the cursor stack so it can be restored later and let player know we took the cursor stack
 		var cursorStack = player.currentScreenHandler.getCursorStack();
 		player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
 		player.currentScreenHandler.syncState();	//also reverts picking up the item
 
 		//Open the inventory (wrap so cursor doesn't reset)
-		var syncId = player.openHandledScreen(WrappedFactory.wrap(fac));
+		var success = opener.open(stack, player, inventory);
 
 		//Allow special inventories to work (ones that normally require a block in the world)
-		if (player.currentScreenHandler instanceof UseAllower a) {
+		if (success && player.currentScreenHandler instanceof UseAllower a) {
 			a.clickOpener_allowUse();
 		}
 
@@ -42,7 +42,7 @@ public class ScreenHelper {
 		player.currentScreenHandler.setCursorStack(cursorStack);
 		player.currentScreenHandler.syncState();
 
-		return syncId;
+		return success;
 	}
 
 	public static boolean openScreen(ServerPlayerEntity player, ClickType clickType, ItemStack stack, Inventory inventory) {
@@ -50,10 +50,9 @@ public class ScreenHelper {
 		if (!ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(player, clickType) || !(item instanceof BlockItem bi) || !ClickOpenerMod.CONFIG.isAllowed(bi)) return false;
 
 		var handler = HandlerRegistry.get(bi);
-		if (handler == null || !handler.canCreateFactory(stack, player, inventory)) return false;
+		if (handler == null) return false;//TODO Use a best guess default if config enabled
 
-		var syncId = openScreen(player, handler.createFactory(stack, player, inventory));
-		if (syncId.isPresent()) {
+		if (openScreen(player, stack, inventory, handler)) {
 			final var h = player.currentScreenHandler;
 			((Openable)(Object)stack).clickopener$setCloser(()->{
 				if (player.currentScreenHandler == h) {

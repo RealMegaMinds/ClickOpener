@@ -17,6 +17,6 @@ public class HandlerRegisterEvent {
 	}, VANILLA_PHASE, Event.DEFAULT_PHASE);
 
 	public interface HandlerRegisterEventListener {
-		void onRegister(BiConsumer<BlockItem, ItemScreenHandler> registyFunc);
+		void onRegister(BiConsumer<BlockItem, ItemScreenOpener> registyFunc);
 	}
 }

@@ -7,7 +7,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.server.MinecraftServer;
 
 public class HandlerRegistry {
-	private static final Map<BlockItem, ItemScreenHandler> ITEM_SCREEN_HANDLERS = new HashMap<>();
+	private static final Map<BlockItem, ItemScreenOpener> ITEM_SCREEN_HANDLERS = new HashMap<>();
 
 	private HandlerRegistry() {}
 
@@ -21,11 +21,11 @@ public class HandlerRegistry {
 		}
 	}
 
-	private static void register(BlockItem item, ItemScreenHandler handler) {
+	private static void register(BlockItem item, ItemScreenOpener handler) {
 		ITEM_SCREEN_HANDLERS.put(item, handler);
 	}
 
-	public static ItemScreenHandler get(BlockItem item) {
+	public static ItemScreenOpener get(BlockItem item) {
 		return ITEM_SCREEN_HANDLERS.get(item);
 	}
 }
