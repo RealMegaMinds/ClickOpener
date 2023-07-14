@@ -6,17 +6,16 @@ import megaminds.clickopener.ClickOpenerMod;
 import megaminds.clickopener.api.ClickType;
 import megaminds.clickopener.api.HandlerRegistry;
 import megaminds.clickopener.api.ItemScreenOpener;
+import megaminds.clickopener.impl.ClosePacketSkipper;
 import megaminds.clickopener.impl.Openable;
 import megaminds.clickopener.impl.StackHolder;
 import megaminds.clickopener.impl.UseAllower;
-import megaminds.clickopener.screenhandlers.WrappedFactory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.GenericContainerScreenHandler;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
@@ -30,8 +29,10 @@ public class ScreenHelper {
 		player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
 		player.currentScreenHandler.syncState();	//also reverts picking up the item
 
-		//Open the inventory (wrap so cursor doesn't reset)
+		//Open the inventory (skip the close packet to prevent the cursor position from resetting)
+		((ClosePacketSkipper)player).clickopener$setSkipClosePacket(true);
 		var success = opener.open(stack, player, inventory);
+		((ClosePacketSkipper)player).clickopener$setSkipClosePacket(false);
 
 		//Allow special inventories to work (ones that normally require a block in the world)
 		if (success && player.currentScreenHandler instanceof UseAllower a) {
