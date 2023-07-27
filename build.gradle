@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.2-SNAPSHOT'
+	id 'fabric-loom' version '1.3-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -16,6 +16,28 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	
+	//AdditionZ, Trading Post, Supplementaries
+	exclusiveContent {
+		forRepository {
+			maven {url "https://api.modrinth.com/maven"}
+		}
+		filter {
+			includeGroup "maven.modrinth"
+		}
+	}
+	
+	maven {url "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"}	//PuzzlesLib (Needed for Trading Post Compat)
+	
+	//Supplementaries Squared
+	exclusiveContent {
+		forRepository {
+			maven {url "https://cursemaven.com"}
+		}
+		filter {
+			includeGroup "curse.maven"
+		}
+	}
 	
 	maven {url "https://raw.githubusercontent.com/Aton-Kish/mcmod/maven"}	//ReinforcedShulker
 	
@@ -39,6 +61,14 @@ dependencies {
 	//Reinforced Shulkers
 	modCompileOnly "atonkish.reinfshulker:reinforced-shulker-boxes:${project.reinforced_shulker_version}"
 	modCompileOnly "atonkish.reinfcore:reinforced-core:${project.reinforced_core_version}"
+
+//	modCompileOnly "maven.modrinth:supplementaries:${project.supplementaries_version}"
+//	modCompileOnly "curse.maven:supplementaries-squared-838411:${project.supp_squared_version}"
+//	modCompileOnly "maven.modrinth:additionz:${project.additionz_version}" //wait until updated to 1.20.1
+	modCompileOnly "maven.modrinth:trading-post:${project.tradingpost_version}"
+	modCompileOnly("fuzs.puzzleslib:puzzleslib-fabric:${project.puzzleslib_version}") {
+		exclude group: 'dev.onyxstudios.cardinal-components-api'
+	}
 }
 
 processResources {
