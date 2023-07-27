@@ -35,8 +35,8 @@ public class ScreenHelper {
 		((ClosePacketSkipper)player).clickopener$setSkipClosePacket(false);
 
 		//Allow special inventories to work (ones that normally require a block in the world)
-		if (success && player.currentScreenHandler instanceof UseAllower a) {
-			a.clickOpener_allowUse();
+		if (success) {
+			((UseAllower) player.currentScreenHandler).clickopener$allowUse();
 		}
 
 		//Restore the cursor stack and let player know
