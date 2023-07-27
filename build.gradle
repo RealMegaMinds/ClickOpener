@@ -57,6 +57,7 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	modCompileOnly "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"	//Override old versions until other mods have updated
 	
 	//Reinforced Shulkers
 	modCompileOnly "atonkish.reinfshulker:reinforced-shulker-boxes:${project.reinforced_shulker_version}"
@@ -64,7 +65,7 @@ dependencies {
 
 //	modCompileOnly "maven.modrinth:supplementaries:${project.supplementaries_version}"
 //	modCompileOnly "curse.maven:supplementaries-squared-838411:${project.supp_squared_version}"
-//	modCompileOnly "maven.modrinth:additionz:${project.additionz_version}" //wait until updated to 1.20.1
+	modCompileOnly "maven.modrinth:additionz:${project.additionz_version}"
 	modCompileOnly "maven.modrinth:trading-post:${project.tradingpost_version}"
 	modCompileOnly("fuzs.puzzleslib:puzzleslib-fabric:${project.puzzleslib_version}") {
 		exclude group: 'dev.onyxstudios.cardinal-components-api'

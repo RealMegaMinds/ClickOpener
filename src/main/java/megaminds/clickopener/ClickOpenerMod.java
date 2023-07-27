@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder;
 
 import megaminds.clickopener.api.HandlerRegisterEvent;
 import megaminds.clickopener.api.HandlerRegistry;
+import megaminds.clickopener.compat.AdditionZCompat;
 import megaminds.clickopener.compat.ReinforcedShulkersCompat;
 import megaminds.clickopener.compat.TradingPostCompat;
 import megaminds.clickopener.compat.VanillaCompat;
@@ -45,6 +46,10 @@ public class ClickOpenerMod implements ModInitializer {
 
 		if (FabricLoader.getInstance().isModLoaded("reinfshulker")) {
 			HandlerRegisterEvent.EVENT.register(ReinforcedShulkersCompat::register);
+		}
+		
+		if (FabricLoader.getInstance().isModLoaded("additionz")) {
+			HandlerRegisterEvent.EVENT.register(AdditionZCompat::register);
 		}
 		
 		if (FabricLoader.getInstance().isModLoaded("tradingpost")) {
