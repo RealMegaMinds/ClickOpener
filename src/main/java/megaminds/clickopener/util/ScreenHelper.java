@@ -1,7 +1,6 @@
 package megaminds.clickopener.util;
 
 import java.util.function.Function;
-
 import megaminds.clickopener.ClickOpenerMod;
 import megaminds.clickopener.api.ClickType;
 import megaminds.clickopener.api.HandlerRegistry;
@@ -24,19 +23,23 @@ public class ScreenHelper {
 	private ScreenHelper() {}
 
 	public static boolean openScreen(ServerPlayerEntity player, ItemStack stack, Inventory inventory, ItemScreenOpener opener) {
+		var previous = player.currentScreenHandler;
+
 		//Save the cursor stack so it can be restored later and let player know we took the cursor stack
-		var cursorStack = player.currentScreenHandler.getCursorStack();
-		player.currentScreenHandler.setCursorStack(ItemStack.EMPTY);
-		player.currentScreenHandler.syncState();	//also reverts picking up the item
+		var cursorStack = previous.getCursorStack();
+		previous.setCursorStack(ItemStack.EMPTY);
+		previous.syncState();	//also reverts picking up the item
 
 		//Open the inventory (skip the close packet to prevent the cursor position from resetting)
 		((ClosePacketSkipper)player).clickopener$setSkipClosePacket(true);
-		var success = opener.open(stack, player, inventory);
+		opener.open(stack, player, inventory);
+		var success = player.currentScreenHandler != previous;
 		((ClosePacketSkipper)player).clickopener$setSkipClosePacket(false);
 
 		//Allow special inventories to work (ones that normally require a block in the world)
 		if (success) {
 			((UseAllower) player.currentScreenHandler).clickopener$allowUse();
+			opener.afterSuccess(stack, player, inventory);
 		}
 
 		//Restore the cursor stack and let player know
@@ -48,23 +51,33 @@ public class ScreenHelper {
 
 	public static boolean openScreen(ServerPlayerEntity player, ClickType clickType, ItemStack stack, Inventory inventory) {
 		var item = stack.getItem();
-		if (!ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(player, clickType) || !(item instanceof BlockItem bi) || !ClickOpenerMod.CONFIG.isAllowed(bi)) return false;
+		if (!ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(player, clickType) || !(item instanceof BlockItem bi) || !ClickOpenerMod.CONFIG.isAllowed(bi)) {
+			return false;
+		}
 
 		var handler = HandlerRegistry.get(bi);
 		if (handler == null) {
 			handler = ItemScreenOpener.BLOCK_USE_HANDLER;
+			ClickOpenerMod.LOGGER.debug("Using default handler.");
 		}
 
-		if (openScreen(player, stack, inventory, handler)) {
-			final var h = player.currentScreenHandler;
-			((Openable)(Object)stack).clickopener$setCloser(()->{
-				if (player.currentScreenHandler == h) {
-					player.closeHandledScreen();
-				}
-			});
-			((StackHolder)h).clickopener$setOpenStack(stack);
+		try {
+			if (openScreen(player, stack, inventory, handler)) {
+				final var h = player.currentScreenHandler;
+				((Openable)(Object)stack).clickopener$setCloser(()->{
+					if (player.currentScreenHandler == h) {
+						player.closeHandledScreen();
+					}
+				});
+				((StackHolder)h).clickopener$setOpenStack(stack);
+				return true;
+			}
+		} catch (RuntimeException e) {
+			ClickOpenerMod.LOGGER.warn("Error opening item", e);
 		}
-		return true;
+
+		ClickOpenerMod.LOGGER.atDebug().setMessage("Failed to open screen for {}.").addArgument(() -> Registries.ITEM.getId(item)).log();
+		return false;
 	}
 
 	/**
