@@ -19,33 +19,25 @@ import net.minecraft.util.Identifier;
 
 /**
  * whitelist
- * - True: List is a Whitelist (only these blocks/items are allowed)
- * - False: List is a Blacklist (all blocks/items except these are allowed)
- * 
- * list
  * - Contains ids of items (minecraft:crafting_table), item tags prefixed by item (item#minecraft:anvil),
- *   or block tags prefixed by block (block#minecraft:shulker_boxes). Tags without prefix will check both item and block.
+ *   or block tags prefixed by block (block#minecraft:shulker_boxes). Tags without prefix will add both item and block.
  * 
- * exceptions
+ * blacklist
  * - Contains ids of items. Useful for excluding a single item from a tag (minecraft:damaged_anvil).
  */
 public class Config {
 	public static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve(ClickOpenerMod.MODID+".json");
 
-	private boolean whitelist;
 	private final Set<TagKey<Item>> itemTagsList;
 	private final Set<TagKey<Block>> blockTagsList;
 	private final Set<Identifier> idList;
-	private final Set<Identifier> exceptions;
+	private final Set<Identifier> blacklist;
 
+	//TODO Figure out where this was needed
 	private boolean ignoreUUIDWithoutPlayer;
 
-	public Config() {
-		this(true);
-	}
-
-	public boolean isWhitelist() {
-		return whitelist;
+	public boolean ignoreUUIDWithoutPlayer() {
+		return ignoreUUIDWithoutPlayer;
 	}
 
 	public Set<TagKey<Item>> getItemTagsList() {
@@ -60,32 +52,22 @@ public class Config {
 		return idList;
 	}
 
-	public Set<Identifier> getExceptions() {
-		return exceptions;
+	public Set<Identifier> getBlacklist() {
+		return blacklist;
 	}
 
-	public void setWhitelist(boolean whitelist) {
-		this.whitelist = whitelist;
-	}
-
-	public Config(boolean whitelist) {
-		this.whitelist = whitelist;
+	public Config() {
 		this.itemTagsList = new HashSet<>();
 		this.blockTagsList = new HashSet<>();
 		this.idList = new HashSet<>();
-		this.exceptions = new HashSet<>();
+		this.blacklist = new HashSet<>();
 	}
 
 	public void reset() {
-		reset(true);
-	}
-
-	public void reset(boolean whitelist) {
-		this.whitelist = whitelist;
 		this.idList.clear();
 		this.itemTagsList.clear();
 		this.blockTagsList.clear();
-		this.exceptions.clear();
+		this.blacklist.clear();
 	}
 
 	public void reload() {
@@ -120,30 +102,30 @@ public class Config {
 		}
 	}
 
-	public void addBlockItem(Identifier id, boolean list, boolean storeToFile) {
-		if (list) {
+	public void addBlockItem(Identifier id, boolean whitelist, boolean storeToFile) {
+		if (whitelist) {
 			idList.add(id);
 		} else {
-			exceptions.add(id);
+			blacklist.add(id);
 		}
 		if (storeToFile) write();
 	}
 
-	public void addBlockItem(Identifier id, boolean list) {
-		addBlockItem(id, list, true);
+	public void addBlockItem(Identifier id, boolean whitelist) {
+		addBlockItem(id, whitelist, true);
 	}
 
-	public void removeBlockItem(Identifier id, boolean list, boolean storeToFile) {
-		if (list) {
+	public void removeBlockItem(Identifier id, boolean whitelist, boolean storeToFile) {
+		if (whitelist) {
 			idList.remove(id);
 		} else {
-			exceptions.remove(id);
+			blacklist.remove(id);
 		}
 		if (storeToFile) write();
 	}
 
-	public void removeBlockItem(Identifier id, boolean list) {
-		removeBlockItem(id, list, true);
+	public void removeBlockItem(Identifier id, boolean whitelist) {
+		removeBlockItem(id, whitelist, true);
 	}
 
 	public void addItemTag(Identifier tag, boolean storeToFile) {
@@ -184,29 +166,31 @@ public class Config {
 
 	public boolean isAllowed(BlockItem item) {
 		var id = Registries.ITEM.getId(item);
-		var isInLists = idList.contains(id) || itemTagsList.stream().anyMatch(Registries.ITEM.getEntry(item)::isIn) || blockTagsList.stream().anyMatch(Registries.BLOCK.getEntry(item.getBlock())::isIn);
-		return whitelist && isInLists && !exceptions.contains(id) || !whitelist && (!isInLists || exceptions.contains(id));
+		return (idList.contains(id)
+				|| itemTagsList.stream().anyMatch(Registries.ITEM.getEntry(item)::isIn)
+				|| blockTagsList.stream().anyMatch(Registries.BLOCK.getEntry(item.getBlock())::isIn))
+				&& !blacklist.contains(id);
 	}
 
-	private static record ConfigBuilder(boolean ignoreUUIDWithoutPlayer, boolean whitelist, Set<String> list, Set<Identifier> exceptions) {
+	private static record ConfigBuilder(boolean ignoreUUIDWithoutPlayer, Set<String> whitelist, Set<Identifier> blacklist) {
 		public ConfigBuilder(Config config) {
-			this(config.ignoreUUIDWithoutPlayer, config.whitelist, new HashSet<>(), new HashSet<>());
+			this(config.ignoreUUIDWithoutPlayer, new HashSet<>(), new HashSet<>());
 			for (var k : config.itemTagsList) {
-				list.add("item#"+k.id());
+				whitelist.add("item#"+k.id());
 			}
 			for (var k : config.blockTagsList) {
-				list.add("block#"+k.id());
+				whitelist.add("block#"+k.id());
 			}
 			for (var b : config.idList) {
-				list.add(b.toString());
+				whitelist.add(b.toString());
 			}
-			exceptions.addAll(config.exceptions);
+			blacklist.addAll(config.blacklist);
 		}
 
 		public void fill(Config config) {
-			config.reset(whitelist);
+			config.reset();
 			config.ignoreUUIDWithoutPlayer = ignoreUUIDWithoutPlayer;
-			for (var s : list) {
+			for (var s : whitelist) {
 				var arr = s.split("#",2);
 				if (arr.length == 1) {
 					config.idList.add(new Identifier(s));
@@ -221,12 +205,12 @@ public class Config {
 				}
 			}
 
-			config.exceptions.addAll(exceptions);
+			config.blacklist.addAll(blacklist);
 		}
 
 		@Override
 		public String toString() {
-			return "[whitelist="+whitelist+", list="+list+", exceptions="+exceptions+"]";
+			return "[list="+whitelist+", exceptions="+blacklist+"]";
 		}
 	}
 }

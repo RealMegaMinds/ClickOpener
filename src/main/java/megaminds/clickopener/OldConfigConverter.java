@@ -29,13 +29,15 @@ public class OldConfigConverter {
 		}
 
 		//Fill config
+		config.reset();
 		var def = Boolean.parseBoolean((String)properties.computeIfAbsent(DEFAULT_KEY, k->"false"));
-		config.reset(!def);
-		properties.forEach((key, value)->{
-			if (!(key instanceof String k) || !(value instanceof String v) || CLICK_TYPE_KEY.equals(key) || DEFAULT_KEY.equals(key)) return;
+		if (def) {
+			ClickOpenerMod.LOGGER.error("Cannot convert old config: New config requires a whitelist.");
+			return;
+		}
 
-			var allowed = Boolean.parseBoolean(v);
-			if (def != allowed) {
+		properties.forEach((key, value)->{
+			if (key instanceof String k && value instanceof String v && !CLICK_TYPE_KEY.equals(key) && !DEFAULT_KEY.equals(key) && Boolean.parseBoolean(v)) {
 				config.addBlockItem(new Identifier(k), true, false);
 			}
 		});

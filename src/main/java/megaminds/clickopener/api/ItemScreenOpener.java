@@ -10,7 +10,7 @@ public interface ItemScreenOpener {
 	@SuppressWarnings("deprecation")
 	public static final ItemScreenOpener BLOCK_USE_HANDLER = (stack, player, i) -> {
 		var block = ((BlockItem)stack.getItem()).getBlock();
-		block.onUse(block.getDefaultState(), player.getServerWorld(), player.getBlockPos(), player, null, null);
+		block.onUse(block.getDefaultState(), player.getWorld(), player.getBlockPos(), player, null, null);
 	};
 	public static final ItemScreenOpener BLOCK_STATE_HANDLER = (ScreenFactoryOpener)(stack, player, i) -> ((BlockItem)stack.getItem()).getBlock().getDefaultState().createScreenHandlerFactory(player.getWorld(), player.getBlockPos());
 

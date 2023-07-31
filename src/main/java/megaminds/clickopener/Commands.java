@@ -15,8 +15,6 @@ import java.util.Arrays;
 import static net.minecraft.server.command.CommandManager.argument;
 import static net.minecraft.command.argument.IdentifierArgumentType.identifier;
 import static net.minecraft.command.argument.IdentifierArgumentType.getIdentifier;
-import static com.mojang.brigadier.arguments.BoolArgumentType.bool;
-import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 
@@ -29,6 +27,7 @@ import net.minecraft.server.command.CommandManager.RegistrationEnvironment;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
+//TODO Add commands for blacklist and other config values
 public class Commands {
 	private static final SuggestionProvider<ServerCommandSource> BLOCK_ITEM_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.ITEM.stream().filter(BlockItem.class::isInstance).map(Registries.ITEM::getId), builder);
 	private static final SuggestionProvider<ServerCommandSource> ITEM_TAG_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.ITEM.streamTags().map(TagKey::id), builder);
@@ -36,7 +35,6 @@ public class Commands {
 	private static final SuggestionProvider<ServerCommandSource> LISTED_ITEMS_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(ClickOpenerMod.CONFIG.getIdList(), builder);
 	private static final SuggestionProvider<ServerCommandSource> CLICK_TYPE_SUGGESTIONS = (context, builder) -> CommandSource.suggestMatching(Arrays.stream(ClickType.values()).filter(c->!ClickType.OTHER.equals(c)).map(Enum::name), builder);
 	private static final String ID = "id";
-	private static final String WHITELIST = "whitelist";
 	private static final String CLICK_TYPE = "clickType";
 
 	//Really the feedback should be made translatable
@@ -52,10 +50,6 @@ public class Commands {
 
 		var reload = literal("reload")
 				.executes(Commands::reload);
-
-		var whitelist = literal(WHITELIST)
-				.then(argument(WHITELIST, bool())
-						.executes(Commands::whitelist));
 
 		var add = literal("add")
 				.then(literal("item")
@@ -87,7 +81,6 @@ public class Commands {
 								.executes(Commands::removeItemTag)));
 
 		serverRoot.then(reload)
-		.then(whitelist)
 		.then(add)
 		.then(remove);		
 
@@ -97,7 +90,7 @@ public class Commands {
 				.then(argument(CLICK_TYPE, word())
 						.suggests(CLICK_TYPE_SUGGESTIONS)
 						.executes(Commands::clickType));
-		
+
 		playerRoot.then(clickType);
 
 		dispatcher.register(serverRoot);
@@ -119,13 +112,6 @@ public class Commands {
 	private static int reload(CommandContext<ServerCommandSource> context) {
 		ClickOpenerMod.CONFIG.reload();
 		context.getSource().sendFeedback(() -> Text.of("ClickOpener Config Reloaded"), false);
-		return 1;
-	}
-
-	private static int whitelist(CommandContext<ServerCommandSource> context) {
-		var whitelist = getBool(context, WHITELIST);
-		ClickOpenerMod.CONFIG.setWhitelist(whitelist);
-		context.getSource().sendFeedback(() -> Text.of("Whitelist set to "+whitelist), false);
 		return 1;
 	}
 
