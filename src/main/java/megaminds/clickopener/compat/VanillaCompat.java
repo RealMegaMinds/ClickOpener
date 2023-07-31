@@ -41,13 +41,6 @@ public class VanillaCompat {
 		});
 		registryFunc.accept((BlockItem)Items.ENCHANTING_TABLE, (ScreenFactoryOpener)(stack, p, i) -> new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new EnchantmentScreenHandler(syncId, inventory, ScreenHandlerContext.create(player.getWorld(), player.getBlockPos())), stack.getName()));
 
-		registryFunc.accept((BlockItem)Items.CARTOGRAPHY_TABLE, ItemScreenOpener.BLOCK_USE_HANDLER);
-		registryFunc.accept((BlockItem)Items.CRAFTING_TABLE, ItemScreenOpener.BLOCK_USE_HANDLER);
-		registryFunc.accept((BlockItem)Items.GRINDSTONE, ItemScreenOpener.BLOCK_USE_HANDLER);
-		registryFunc.accept((BlockItem)Items.LOOM, ItemScreenOpener.BLOCK_USE_HANDLER);
-		registryFunc.accept((BlockItem)Items.SMITHING_TABLE, ItemScreenOpener.BLOCK_USE_HANDLER);
-		registryFunc.accept((BlockItem)Items.STONECUTTER, ItemScreenOpener.BLOCK_USE_HANDLER);
-
 		var anvilHandler = new ScreenFactoryOpener() {
 			@Override
 			public NamedScreenHandlerFactory createFactory(ItemStack stack, ServerPlayerEntity p, Inventory inv) {

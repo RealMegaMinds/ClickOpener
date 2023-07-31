@@ -51,7 +51,9 @@ public class ScreenHelper {
 		if (!ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(player, clickType) || !(item instanceof BlockItem bi) || !ClickOpenerMod.CONFIG.isAllowed(bi)) return false;
 
 		var handler = HandlerRegistry.get(bi);
-		if (handler == null) return false;//TODO Use a best guess default if config enabled
+		if (handler == null) {
+			handler = ItemScreenOpener.BLOCK_USE_HANDLER;
+		}
 
 		if (openScreen(player, stack, inventory, handler)) {
 			final var h = player.currentScreenHandler;
