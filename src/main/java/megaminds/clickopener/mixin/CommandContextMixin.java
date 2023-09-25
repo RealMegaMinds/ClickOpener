@@ -10,7 +10,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 
 import megaminds.clickopener.impl.ArgumentChecker;
 
-@Mixin(CommandContext.class)
+@Mixin(value = CommandContext.class, remap = false)
 public abstract class CommandContextMixin implements ArgumentChecker {
 	@Shadow
 	@Final
