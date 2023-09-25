@@ -13,14 +13,14 @@ import net.minecraft.item.ItemStack;
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements Openable {
 	@Shadow
-	private boolean empty;
+	public abstract boolean isEmpty();
 
 	@Unique
 	private Runnable closer;
 
 	@Inject(at = @At("RETURN"), method = "setCount")
 	private void clickopener_onSetCount(int count, CallbackInfo info) {
-		if (empty && closer!=null) {
+		if (isEmpty() && closer!=null) {
 			var tmp = closer;
 			closer = null;
 			tmp.run();
