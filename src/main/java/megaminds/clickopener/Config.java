@@ -95,8 +95,8 @@ public class Config {
 		}
 	}
 
-	public void addBlockItem(Identifier id, boolean whitelist, boolean storeToFile) {
-		if (whitelist) {
+	public void addBlockItem(Identifier id, boolean allow, boolean storeToFile) {
+		if (allow) {
 			idList.add(id);
 		} else {
 			blacklist.add(id);
@@ -104,12 +104,12 @@ public class Config {
 		if (storeToFile) write();
 	}
 
-	public void addBlockItem(Identifier id, boolean whitelist) {
-		addBlockItem(id, whitelist, true);
+	public void addBlockItem(Identifier id, boolean allow) {
+		addBlockItem(id, allow, true);
 	}
 
-	public void removeBlockItem(Identifier id, boolean whitelist, boolean storeToFile) {
-		if (whitelist) {
+	public void removeBlockItem(Identifier id, boolean allow, boolean storeToFile) {
+		if (allow) {
 			idList.remove(id);
 		} else {
 			blacklist.remove(id);
@@ -117,8 +117,8 @@ public class Config {
 		if (storeToFile) write();
 	}
 
-	public void removeBlockItem(Identifier id, boolean whitelist) {
-		removeBlockItem(id, whitelist, true);
+	public void removeBlockItem(Identifier id, boolean allow) {
+		removeBlockItem(id, allow, true);
 	}
 
 	public void addItemTag(Identifier tag, boolean storeToFile) {
