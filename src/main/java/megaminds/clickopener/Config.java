@@ -33,13 +33,6 @@ public class Config {
 	private final Set<Identifier> idList;
 	private final Set<Identifier> blacklist;
 
-	//TODO Figure out where this was needed
-	private boolean ignoreUUIDWithoutPlayer;
-
-	public boolean ignoreUUIDWithoutPlayer() {
-		return ignoreUUIDWithoutPlayer;
-	}
-
 	public Set<TagKey<Item>> getItemTagsList() {
 		return itemTagsList;
 	}
@@ -172,9 +165,9 @@ public class Config {
 				&& !blacklist.contains(id);
 	}
 
-	private static record ConfigBuilder(boolean ignoreUUIDWithoutPlayer, Set<String> whitelist, Set<Identifier> blacklist) {
+	private static record ConfigBuilder(Set<String> whitelist, Set<Identifier> blacklist) {
 		public ConfigBuilder(Config config) {
-			this(config.ignoreUUIDWithoutPlayer, new HashSet<>(), new HashSet<>());
+			this(new HashSet<>(), new HashSet<>());
 			for (var k : config.itemTagsList) {
 				whitelist.add("item#"+k.id());
 			}
@@ -189,7 +182,6 @@ public class Config {
 
 		public void fill(Config config) {
 			config.reset();
-			config.ignoreUUIDWithoutPlayer = ignoreUUIDWithoutPlayer;
 			for (var s : whitelist) {
 				var arr = s.split("#",2);
 				if (arr.length == 1) {
