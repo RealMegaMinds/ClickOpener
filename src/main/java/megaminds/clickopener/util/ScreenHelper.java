@@ -81,11 +81,15 @@ public class ScreenHelper {
 	}
 
 	/**
-	 * Requires inventory size to be multiple of 9 with max size of 9x6.
+	 * Requires inventory size to be multiple of 9 with max size of 54.
 	 */
 	public static ScreenHandlerFactory genericScreenHandlerFactoryFor(Function<PlayerEntity, Inventory> inventoryProducer) {
 		return (syncId, playerInventory, player) -> {
 			var inventory = inventoryProducer.apply(player);
+			
+			if (inventory.size() > 54) {
+				throw new IllegalArgumentException("Cannot create inventory of size: "+inventory.size());
+			}
 			var rowCount = inventory.size() / 9;
 			var type = Registries.SCREEN_HANDLER.get(new Identifier("generic_9x"+rowCount));
 			return new GenericContainerScreenHandler(type, syncId, playerInventory, inventory, rowCount);
