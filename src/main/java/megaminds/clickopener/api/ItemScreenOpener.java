@@ -5,12 +5,16 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public interface ItemScreenOpener {
 	@SuppressWarnings("deprecation")
 	public static final ItemScreenOpener BLOCK_USE_HANDLER = (stack, player, i) -> {
 		var block = ((BlockItem)stack.getItem()).getBlock();
-		block.onUse(block.getDefaultState(), player.getWorld(), player.getBlockPos(), player, null, null);
+		var pos = player.getBlockPos();
+		block.onUse(block.getDefaultState(), player.getWorld(), pos, player, player.getActiveHand(), new BlockHitResult(Vec3d.ofBottomCenter(pos), Direction.DOWN, pos, false));
 	};
 	public static final ItemScreenOpener BLOCK_STATE_HANDLER = (ScreenFactoryOpener)(stack, player, i) -> ((BlockItem)stack.getItem()).getBlock().getDefaultState().createScreenHandlerFactory(player.getWorld(), player.getBlockPos());
 
