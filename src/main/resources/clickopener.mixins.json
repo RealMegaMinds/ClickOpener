@@ -9,7 +9,9 @@
     "ScreenHandlerMixin",
     "ServerPlayerEntityMixin",
     "ServerPlayNetworkHandlerMixin",
-    "SpecialScreenHandlerMixin"
+    "SpecialScreenHandlerMixin",
+    "SlotMixin",
+    "InventoryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

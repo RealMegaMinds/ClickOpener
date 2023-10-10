@@ -1,5 +1,6 @@
 package megaminds.clickopener.api;
 
+import megaminds.clickopener.impl.DelegateSlotReceiver;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
@@ -17,17 +18,27 @@ public class BlockEntityInventory implements Inventory {
 	private final BlockEntityType<?> entityType;
 	private final DefaultedList<ItemStack> inventory;
 
-	public BlockEntityInventory(ItemStack link, int size, BlockEntityType<?> entityType, DefaultedList<ItemStack> inventory) {
+	public BlockEntityInventory(ItemStack link, int size, BlockEntityType<?> entityType, DefaultedList<ItemStack> inventory, boolean acceptDelegateSlots) {
 		this.link = link;
 		this.size = size;
 		this.entityType = entityType;
 		this.inventory = inventory;
+		((DelegateSlotReceiver)this).clickopener$setAcceptDelegateSlots(acceptDelegateSlots);
 	}
 
-	public BlockEntityInventory(ItemStack link, int size, BlockEntityType<?> entityType) {
+	public BlockEntityInventory(ItemStack link, int size, BlockEntityType<?> entityType, DefaultedList<ItemStack> inventory) {
+		this(link, size, entityType, inventory, false);
+	}
+
+	public BlockEntityInventory(ItemStack link, int size, BlockEntityType<?> entityType, boolean acceptDelegateSlots) {
 		this(link, size, entityType, DefaultedList.ofSize(size, ItemStack.EMPTY));
 		var blockNbt = BlockItem.getBlockEntityNbt(link);
 		if (blockNbt!=null) Inventories.readNbt(blockNbt, inventory);
+		((DelegateSlotReceiver)this).clickopener$setAcceptDelegateSlots(acceptDelegateSlots);
+	}
+
+	public BlockEntityInventory(ItemStack link, int size, BlockEntityType<?> entityType) {
+		this(link, size, entityType, false);
 	}
 
 	public ItemStack getLink() {

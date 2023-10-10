@@ -9,6 +9,7 @@ import megaminds.clickopener.impl.ClosePacketSkipper;
 import megaminds.clickopener.impl.Openable;
 import megaminds.clickopener.impl.StackHolder;
 import megaminds.clickopener.impl.UseAllower;
+import megaminds.clickopener.screenhandlers.DelegatedInventory;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.BlockItem;
@@ -16,8 +17,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandlerFactory;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 
 public class ScreenHelper {
 	private ScreenHelper() {}
@@ -81,18 +82,35 @@ public class ScreenHelper {
 	}
 
 	/**
-	 * Requires inventory size to be multiple of 9 with max size of 54.
+	 * Requires max size of 54
 	 */
-	public static ScreenHandlerFactory genericScreenHandlerFactoryFor(Function<PlayerEntity, Inventory> inventoryProducer) {
+	public static ScreenHandlerFactory adjustableSizeFactoryFor(Function<PlayerEntity, Inventory> inventoryProducer) {
 		return (syncId, playerInventory, player) -> {
 			var inventory = inventoryProducer.apply(player);
-			
 			if (inventory.size() > 54) {
 				throw new IllegalArgumentException("Cannot create inventory of size: "+inventory.size());
 			}
-			var rowCount = inventory.size() / 9;
-			var type = Registries.SCREEN_HANDLER.get(new Identifier("generic_9x"+rowCount));
-			return new GenericContainerScreenHandler(type, syncId, playerInventory, inventory, rowCount);
+
+			var rowCount = getRowCountFor(inventory.size());
+			var displaySize = rowCount * 9;
+			var invToUse = displaySize == inventory.size() ? inventory : new DelegatedInventory(inventory, displaySize);
+			return new GenericContainerScreenHandler(getGenericTypeForRowCount(rowCount), syncId, playerInventory, invToUse, rowCount);
+		};
+	}
+
+	public static int getRowCountFor(int size) {
+		return (int) Math.ceil(size / 9.0);
+	}
+
+	public static ScreenHandlerType<GenericContainerScreenHandler> getGenericTypeForRowCount(int rowCount) {
+		return switch (rowCount) {
+			case 1 -> ScreenHandlerType.GENERIC_9X1;
+			case 2 -> ScreenHandlerType.GENERIC_9X2;
+			case 3 -> ScreenHandlerType.GENERIC_9X3;
+			case 4 -> ScreenHandlerType.GENERIC_9X4;
+			case 5 -> ScreenHandlerType.GENERIC_9X5;
+			case 6 -> ScreenHandlerType.GENERIC_9X6;
+			default -> throw new IllegalArgumentException("rowCount must be >0 and <=6");
 		};
 	}
 }
