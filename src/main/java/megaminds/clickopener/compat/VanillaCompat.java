@@ -3,7 +3,7 @@ package megaminds.clickopener.compat;
 import java.util.function.BiConsumer;
 
 import megaminds.clickopener.api.ItemScreenOpener;
-import megaminds.clickopener.api.ShulkerInventory;
+import megaminds.clickopener.api.BlockEntityInventory;
 import megaminds.clickopener.api.ItemScreenOpener.ScreenFactoryOpener;
 import megaminds.clickopener.screenhandlers.AnvilItemScreenHandler;
 import megaminds.clickopener.util.ScreenHelper;
@@ -59,7 +59,7 @@ public class VanillaCompat {
 		var shulkerBoxHandler = ItemScreenOpener.requireSingleStack(new ScreenFactoryOpener() {
 			@Override
 			public NamedScreenHandlerFactory createFactory(ItemStack stack, ServerPlayerEntity p, Inventory i) {
-				return new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new ShulkerBoxScreenHandler(syncId, inventory, new ShulkerInventory(stack, 27, BlockEntityType.SHULKER_BOX)), stack.hasCustomName() ? stack.getName() : Text.translatable("container.shulkerBox"));
+				return new SimpleNamedScreenHandlerFactory((syncId, inventory, player)->new ShulkerBoxScreenHandler(syncId, inventory, new BlockEntityInventory(stack, 27, BlockEntityType.SHULKER_BOX)), stack.hasCustomName() ? stack.getName() : Text.translatable("container.shulkerBox"));
 			}
 
 			@Override
