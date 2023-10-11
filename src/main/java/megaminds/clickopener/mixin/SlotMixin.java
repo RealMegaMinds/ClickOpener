@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import megaminds.clickopener.impl.DelegateSlotReceiver;
+import megaminds.clickopener.screenhandlers.DelegatedInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
@@ -24,7 +24,7 @@ public abstract class SlotMixin {
 
 	@Inject(method = "canInsert", at = @At("HEAD"), cancellable = true)
 	public void canInsert(ItemStack stack, CallbackInfoReturnable<Boolean> info) {
-		if (((DelegateSlotReceiver)inventory).clickopener$isAcceptDelegateSlots()) {
+		if (inventory instanceof DelegatedInventory d && d.shouldValidateSlots()) {
 			info.setReturnValue(inventory.isValid(index, stack));
 		}
 	}

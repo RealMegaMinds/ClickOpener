@@ -84,7 +84,7 @@ public class ScreenHelper {
 	/**
 	 * Requires max size of 54
 	 */
-	public static ScreenHandlerFactory adjustableSizeFactoryFor(Function<PlayerEntity, Inventory> inventoryProducer) {
+	public static ScreenHandlerFactory adjustableSizeFactoryFor(Function<PlayerEntity, Inventory> inventoryProducer, boolean shouldValidateSlots) {
 		return (syncId, playerInventory, player) -> {
 			var inventory = inventoryProducer.apply(player);
 			if (inventory.size() > 54) {
@@ -93,7 +93,7 @@ public class ScreenHelper {
 
 			var rowCount = getRowCountFor(inventory.size());
 			var displaySize = rowCount * 9;
-			var invToUse = displaySize == inventory.size() ? inventory : new DelegatedInventory(inventory, displaySize);
+			var invToUse = !shouldValidateSlots && displaySize == inventory.size() ? inventory : new DelegatedInventory(inventory, displaySize, shouldValidateSlots);
 			return new GenericContainerScreenHandler(getGenericTypeForRowCount(rowCount), syncId, playerInventory, invToUse, rowCount);
 		};
 	}

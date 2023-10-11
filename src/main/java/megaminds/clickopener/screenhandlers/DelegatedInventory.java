@@ -3,7 +3,6 @@ package megaminds.clickopener.screenhandlers;
 import java.util.Set;
 import java.util.function.Predicate;
 
-import megaminds.clickopener.impl.DelegateSlotReceiver;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
@@ -14,19 +13,25 @@ import net.minecraft.text.Text;
 /**
  * All inventory operations are passed through except where {@link #isFake(int)} == true.
  */
-public class DelegatedInventory implements Inventory, DelegateSlotReceiver {
+public class DelegatedInventory implements Inventory {
 	private static final ItemStack EMPTY = Items.WHITE_STAINED_GLASS_PANE.getDefaultStack().setCustomName(Text.empty());
 
 	private final Inventory delegate;
 	private final int displaySize;
+	private final boolean shouldValidateSlots;
 
-	public DelegatedInventory(Inventory delegate, int displaySize) {
+	public DelegatedInventory(Inventory delegate, int displaySize, boolean shouldValidateSlots) {
 		this.delegate = delegate;
 		this.displaySize = displaySize;
+		this.shouldValidateSlots = shouldValidateSlots;
 
 		if (displaySize < delegate.size()) {
 			throw new IllegalArgumentException("displaySize < delegate.size()");
 		}
+	}
+
+	public DelegatedInventory(Inventory delegate, int displaySize) {
+		this(delegate, displaySize, false);
 	}
 
 	public boolean isFake(int index) {
@@ -139,13 +144,7 @@ public class DelegatedInventory implements Inventory, DelegateSlotReceiver {
 		return delegate.containsAny(predicate);
 	}
 
-	@Override
-	public boolean clickopener$isAcceptDelegateSlots() {
-		return ((DelegateSlotReceiver)delegate).clickopener$isAcceptDelegateSlots();
-	}
-
-	@Override
-	public void clickopener$setAcceptDelegateSlots(boolean acceptDelegateSlots) {
-		((DelegateSlotReceiver)delegate).clickopener$setAcceptDelegateSlots(acceptDelegateSlots);
+	public boolean shouldValidateSlots() {
+		return shouldValidateSlots;
 	}
 }

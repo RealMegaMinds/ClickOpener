@@ -34,13 +34,14 @@ public class SupplementariesCompat {
 		var sackOpener = ItemScreenOpener.requireSingleStack(new ScreenFactoryOpener() {
 			@Override
 			public NamedScreenHandlerFactory createFactory(ItemStack stack, ServerPlayerEntity player, Inventory i) {
-				return new SimpleNamedScreenHandlerFactory(ScreenHelper.adjustableSizeFactoryFor(p -> new BlockEntityInventory(stack, (int)getConfigOption("SACK_SLOTS"), Registries.BLOCK_ENTITY_TYPE.get(new Identifier("supplementaries", "sack")), true) {
+				return new SimpleNamedScreenHandlerFactory(ScreenHelper.adjustableSizeFactoryFor(p -> new BlockEntityInventory(stack, (int)getConfigOption("SACK_SLOTS"), Registries.BLOCK_ENTITY_TYPE.get(new Identifier("supplementaries", "sack"))) {
 					@Override
 					public boolean isValid(int slot, ItemStack stack) {
 						return slot < size() && isAllowedInShulker(stack, player.getServerWorld());
 					}
 
 					@Override
+					@SuppressWarnings("resource")
 					public void onOpen(PlayerEntity player) {
 						var dx = player.getBlockX() + .5;
 						var dy = player.getBlockY() + 1;
@@ -49,6 +50,7 @@ public class SupplementariesCompat {
 					}
 
 					@Override
+					@SuppressWarnings("resource")
 					public void onClose(PlayerEntity player) {
 						super.onClose(player);
 
@@ -57,7 +59,7 @@ public class SupplementariesCompat {
 						var dz = player.getBlockZ() + .5;
 						player.getWorld().playSound(null, dx, dy, dz, Registries.SOUND_EVENT.get(new Identifier("supplementaries", "block.sack.open")), SoundCategory.BLOCKS, 1, player.getEntityWorld().random.nextFloat() * .1f + .8f);
 					}
-				}), stack.hasCustomName() ? stack.getName() : Text.translatable("block.supplementaries.sack"));
+				}, true), stack.hasCustomName() ? stack.getName() : Text.translatable("block.supplementaries.sack"));
 			}
 
 			@Override
@@ -75,11 +77,11 @@ public class SupplementariesCompat {
 			}
 		}
 
-//TODO		registryFunc.accept((BlockItem) Registries.ITEM.get(new Identifier("supplementaries", "safe")), null);
+		//TODO		registryFunc.accept((BlockItem) Registries.ITEM.get(new Identifier("supplementaries", "safe")), null);
 
 		ClickOpenerMod.LOGGER.info("Supplementaries Compat Loaded");
 	}
-	
+
 	//TODO remove reflection when possible
 	public static Object getConfigOption(String name) {
 		try {
@@ -88,7 +90,7 @@ public class SupplementariesCompat {
 			throw new RuntimeException("Unable to get Supplementaries config option: "+name);
 		}
 	}
-	
+
 	//TODO remove reflection when possible
 	private static boolean isAllowedInShulker(ItemStack stack, ServerWorld world) {
 		try {

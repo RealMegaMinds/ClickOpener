@@ -30,7 +30,7 @@ public class VanillaCompat {
 		registryFunc.accept((BlockItem)Items.ENDER_CHEST, new ScreenFactoryOpener() {
 			@Override
 			public NamedScreenHandlerFactory createFactory(ItemStack stack, ServerPlayerEntity player, Inventory inventory) {
-				return new SimpleNamedScreenHandlerFactory(ScreenHelper.adjustableSizeFactoryFor(PlayerEntity::getEnderChestInventory), Text.translatable("container.enderchest"));
+				return new SimpleNamedScreenHandlerFactory(ScreenHelper.adjustableSizeFactoryFor(PlayerEntity::getEnderChestInventory, false), Text.translatable("container.enderchest"));
 			}
 
 			@Override
