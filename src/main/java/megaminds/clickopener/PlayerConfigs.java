@@ -5,8 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
+import java.util.function.UnaryOperator;
+
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
@@ -17,29 +18,39 @@ import net.minecraft.server.network.ServerPlayerEntity;
 
 public class PlayerConfigs {
 	public static final Path CONFIG_FILE = FabricLoader.getInstance().getConfigDir().resolve(ClickOpenerMod.MODID+"_player.json");
-	private static final PlayerConfig PLAYER_DEFAULT = new PlayerConfig(ClickType.RIGHT);
 
 	private final Map<UUID, PlayerConfig> configs;
 
 	public PlayerConfigs() {
-		this.configs = new HashMap<>(0);
+		this.configs = new HashMap<>();
 	}
 
-	private PlayerConfig getOrDefault(UUID uuid) {
-		return configs.computeIfAbsent(uuid, u -> PLAYER_DEFAULT.copy());
+	private PlayerConfig getOrCreate(UUID uuid) {
+		var config = configs.get(uuid);
+		if (config == null) {
+			config = PlayerConfig.defaultConfig();
+			configs.put(uuid, config);
+			write();
+		}
+		return config;
 	}
 
 	public boolean isClickTypeAllowed(ServerPlayerEntity player, ClickType clickType) {
-		return clickType == null || clickType.equals(getOrDefault(player.getUuid()).clickType);
+		return clickType == null || clickType.equals(getOrCreate(player.getUuid()).clickType());
+	}
+
+	private void modifyPlayerConfig(UUID uuid, UnaryOperator<PlayerConfig> modifyFunc) {
+		var old = configs.get(uuid);
+		var config = modifyFunc.apply(old != null ? old : PlayerConfig.defaultConfig());
+
+		if (old != config) {
+			configs.put(uuid, config);
+			write();
+		}
 	}
 
 	public void setClickType(ServerPlayerEntity player, ClickType clickType) {
-		setClickType(player, clickType, true);
-	}
-
-	public void setClickType(ServerPlayerEntity player, ClickType clickType, boolean writeToFile) {
-		getOrDefault(player.getUuid()).clickType = clickType;
-		if (writeToFile) write();
+		modifyPlayerConfig(player.getUuid(), c -> c.withClickType(clickType));
 	}
 
 	public void reload() {
@@ -68,42 +79,19 @@ public class PlayerConfigs {
 
 	public void write() {
 		try (var out = Files.newBufferedWriter(CONFIG_FILE)) {
-			//Uses a copy without defaults to save on file size
-			ClickOpenerMod.GSON.toJson(copyWithoutDefaults(configs), out);
+			ClickOpenerMod.GSON.toJson(configs, out);
 		} catch (IOException | JsonIOException e) {
 			ClickOpenerMod.LOGGER.error("Failed to write configuration file: {}", e.getMessage());
 		}
 	}
 
-	private static Map<UUID, PlayerConfig> copyWithoutDefaults(Map<UUID, PlayerConfig> map) {
-		var result = new HashMap<UUID, PlayerConfig>(map.size());
-		map.forEach((k, v) -> {
-			if (!PLAYER_DEFAULT.equals(v)) {
-				result.put(k, v);
-			}
-		});
-		return result;
-	}
-
-	private static class PlayerConfig {
-		private ClickType clickType;
-
-		public PlayerConfig(ClickType clickType) {
-			this.clickType = clickType;
+	private static record PlayerConfig(ClickType clickType) {
+		public static PlayerConfig defaultConfig() {
+			return new PlayerConfig(ClickOpenerMod.CONFIG.getClickType());
 		}
 
-		public PlayerConfig copy() {
+		public PlayerConfig withClickType(ClickType clickType) {
 			return new PlayerConfig(clickType);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(clickType);
-		}
-
-		@Override
-		public boolean equals(Object obj) {
-			return this == obj || obj instanceof PlayerConfig other && clickType == other.clickType;
 		}
 	}
 }

@@ -36,6 +36,7 @@ public class Commands {
 	private static final SuggestionProvider<ServerCommandSource> CLICK_TYPE_SUGGESTIONS = (context, builder) -> CommandSource.suggestMatching(Arrays.stream(ClickType.values()).filter(c->!ClickType.OTHER.equals(c)).map(Enum::name), builder);
 	private static final String ID = "id";
 	private static final String CLICK_TYPE = "clickType";
+	private static final String DEFAULT_CLICK_TYPE = "defaultClickType";
 
 	//Really the feedback should be made translatable
 	private static final String ADDED_TO_LIST = " added to list.";
@@ -79,6 +80,11 @@ public class Commands {
 						.then(argument(ID, identifier())
 								.suggests(ITEM_TAG_SUGGESTIONS)
 								.executes(Commands::removeItemTag)));
+
+		var defaultClickType = literal(DEFAULT_CLICK_TYPE)
+				.then(argument(DEFAULT_CLICK_TYPE, word())
+						.suggests(CLICK_TYPE_SUGGESTIONS)
+						.executes(Commands::defaultClickType));
 
 		serverRoot.then(reload)
 		.then(add)
@@ -160,6 +166,18 @@ public class Commands {
 		var tag = getIdentifier(context, ID);
 		ClickOpenerMod.CONFIG.removeItemTag(tag);
 		context.getSource().sendFeedback(() -> Text.of("#"+tag+REMOVED_FROM_LIST), false);
+		return 1;
+	}
+
+	private static int defaultClickType(CommandContext<ServerCommandSource> context) {
+		var type = ClickType.tryValueOf(getString(context, DEFAULT_CLICK_TYPE), ClickType.OTHER);
+		if (ClickType.OTHER.equals(type)) {
+			context.getSource().sendError(Text.of("Invalid ClickType"));
+			return 0;
+		}
+
+		ClickOpenerMod.CONFIG.setClickType(type);
+		context.getSource().sendFeedback(() -> Text.of("Default ClickType set to "+type), false);
 		return 1;
 	}
 }

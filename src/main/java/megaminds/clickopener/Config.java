@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.gson.JsonIOException;
 import com.google.gson.JsonParseException;
+
+import megaminds.clickopener.api.ClickType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
@@ -32,6 +35,7 @@ public class Config {
 	private final Set<TagKey<Block>> blockTagsList;
 	private final Set<Identifier> idList;
 	private final Set<Identifier> blacklist;
+	private ClickType clickType;
 
 	public Set<TagKey<Item>> getItemTagsList() {
 		return itemTagsList;
@@ -49,11 +53,16 @@ public class Config {
 		return blacklist;
 	}
 
+	public ClickType getClickType() {
+		return clickType;
+	}
+
 	public Config() {
 		this.itemTagsList = new HashSet<>();
 		this.blockTagsList = new HashSet<>();
 		this.idList = new HashSet<>();
 		this.blacklist = new HashSet<>();
+		this.clickType = ClickType.RIGHT;
 	}
 
 	public void reset() {
@@ -61,6 +70,7 @@ public class Config {
 		this.itemTagsList.clear();
 		this.blockTagsList.clear();
 		this.blacklist.clear();
+		this.clickType = ClickType.RIGHT;
 	}
 
 	public void reload() {
@@ -95,66 +105,50 @@ public class Config {
 		}
 	}
 
-	public void addBlockItem(Identifier id, boolean allow, boolean storeToFile) {
+	public void addBlockItem(Identifier id, boolean allow, boolean writeToFile) {
 		if (allow) {
 			idList.add(id);
 		} else {
 			blacklist.add(id);
 		}
-		if (storeToFile) write();
+		if (writeToFile) write();
 	}
 
 	public void addBlockItem(Identifier id, boolean allow) {
 		addBlockItem(id, allow, true);
 	}
 
-	public void removeBlockItem(Identifier id, boolean allow, boolean storeToFile) {
+	public void removeBlockItem(Identifier id, boolean allow) {
 		if (allow) {
 			idList.remove(id);
 		} else {
 			blacklist.remove(id);
 		}
-		if (storeToFile) write();
-	}
-
-	public void removeBlockItem(Identifier id, boolean allow) {
-		removeBlockItem(id, allow, true);
-	}
-
-	public void addItemTag(Identifier tag, boolean storeToFile) {
-		itemTagsList.add(TagKey.of(RegistryKeys.ITEM, tag));
-		if (storeToFile) write();
+		write();
 	}
 
 	public void addItemTag(Identifier tag) {
-		addItemTag(tag, true);
-	}
-
-	public void addBlockTag(Identifier tag, boolean storeToFile) {
-		blockTagsList.add(TagKey.of(RegistryKeys.BLOCK, tag));
-		if (storeToFile) write();
+		itemTagsList.add(TagKey.of(RegistryKeys.ITEM, tag));
+		write();
 	}
 
 	public void addBlockTag(Identifier tag) {
-		addBlockTag(tag, true);
-	}
-
-	public void removeItemTag(Identifier tag, boolean storeToFile) {
-		itemTagsList.remove(TagKey.of(RegistryKeys.ITEM, tag));
-		if (storeToFile) write();
+		blockTagsList.add(TagKey.of(RegistryKeys.BLOCK, tag));
+		write();
 	}
 
 	public void removeItemTag(Identifier tag) {
-		removeItemTag(tag, true);
-	}
-
-	public void removeBlockTag(Identifier tag, boolean storeToFile) {
-		blockTagsList.remove(TagKey.of(RegistryKeys.BLOCK, tag));
-		if (storeToFile) write();
+		itemTagsList.remove(TagKey.of(RegistryKeys.ITEM, tag));
+		write();
 	}
 
 	public void removeBlockTag(Identifier tag) {
-		removeBlockTag(tag, true);
+		blockTagsList.remove(TagKey.of(RegistryKeys.BLOCK, tag));
+		write();
+	}
+
+	public void setClickType(ClickType clickType) {
+		this.clickType = Objects.requireNonNullElse(clickType, ClickType.RIGHT);
 	}
 
 	public boolean isAllowed(BlockItem item) {
@@ -165,9 +159,9 @@ public class Config {
 				&& !blacklist.contains(id);
 	}
 
-	private static record ConfigBuilder(Set<String> whitelist, Set<Identifier> blacklist) {
+	private static record ConfigBuilder(Set<String> whitelist, Set<Identifier> blacklist, ClickType defaultClickType) {
 		public ConfigBuilder(Config config) {
-			this(new HashSet<>(), new HashSet<>());
+			this(new HashSet<>(), new HashSet<>(), config.clickType);
 			for (var k : config.itemTagsList) {
 				whitelist.add("item#"+k.id());
 			}
@@ -198,11 +192,12 @@ public class Config {
 			}
 
 			config.blacklist.addAll(blacklist);
+			config.setClickType(defaultClickType);
 		}
 
 		@Override
 		public String toString() {
-			return "[list="+whitelist+", exceptions="+blacklist+"]";
+			return "[list="+whitelist+", exceptions="+blacklist+", defaultClickType=" + defaultClickType + "]";
 		}
 	}
 }
