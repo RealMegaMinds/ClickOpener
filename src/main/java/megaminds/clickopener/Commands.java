@@ -111,6 +111,7 @@ public class Commands {
 
 	private static int reload(CommandContext<ServerCommandSource> context) {
 		ClickOpenerMod.CONFIG.reload();
+		ClickOpenerMod.PLAYER_CONFIGS.reload();
 		context.getSource().sendFeedback(() -> Text.of("ClickOpener Config Reloaded"), false);
 		return 1;
 	}
