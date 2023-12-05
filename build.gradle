@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.3-SNAPSHOT'
+	id 'fabric-loom' version '1.4-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -64,6 +64,7 @@ dependencies {
 	modCompileOnly "maven.modrinth:additionz:${project.additionz_version}"
 //	modCompileOnly "maven.modrinth:supplementaries:${project.supplementaries_version}"
 //	modCompileOnly "curse.maven:supplementaries-squared-838411:${project.supp_squared_version}"
+	modCompileOnly "maven.modrinth:carpet-ams-addition:${project.carpet_ams_addition_version}"
 }
 
 processResources {

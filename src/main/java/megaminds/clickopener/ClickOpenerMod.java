@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder;
 
 import megaminds.clickopener.api.HandlerRegisterEvent;
 import megaminds.clickopener.api.HandlerRegistry;
+import megaminds.clickopener.compat.CarpetAMSAdditionCompat;
 import megaminds.clickopener.compat.ReinforcedShulkersCompat;
 import megaminds.clickopener.compat.SupplementariesCompat;
 import megaminds.clickopener.compat.VanillaCompat;
@@ -49,6 +50,11 @@ public class ClickOpenerMod implements ModInitializer {
 
 		if (FabricLoader.getInstance().isModLoaded("supplementaries")) {
 			HandlerRegisterEvent.EVENT.register(SupplementariesCompat::register);
+		}
+
+		if (FabricLoader.getInstance().isModLoaded("carpet-ams-addition")) {
+			HandlerRegisterEvent.EVENT.addPhaseOrdering(HandlerRegisterEvent.VANILLA_PHASE, CarpetAMSAdditionCompat.CARPET_AMS_ADDITION_PHASE);
+			HandlerRegisterEvent.EVENT.register(CarpetAMSAdditionCompat.CARPET_AMS_ADDITION_PHASE, CarpetAMSAdditionCompat::register);
 		}
 
 		ServerLifecycleEvents.SERVER_STARTING.register(HandlerRegistry::onServerLoading);
