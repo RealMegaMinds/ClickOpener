@@ -75,6 +75,8 @@ public class SupplementariesCompat {
 			for (var color : DyeColor.values()) {
 				registryFunc.accept((BlockItem) Registries.ITEM.get(new Identifier("suppsquared", "sack_"+color.getName())), sackOpener);
 			}
+
+			ClickOpenerMod.LOGGER.info("Supplementaries Squared Compat Loaded");
 		}
 
 		//TODO		registryFunc.accept((BlockItem) Registries.ITEM.get(new Identifier("supplementaries", "safe")), null);
