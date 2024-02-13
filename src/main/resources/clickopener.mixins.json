@@ -3,14 +3,12 @@
   "minVersion": "0.8",
   "package": "megaminds.clickopener.mixin",
   "mixins": [
-    "AnvilScreenHandlerInvoker",
     "CommandContextMixin",
+    "ForcedScreenHandlerMixin",
     "ItemStackMixin",
     "ScreenHandlerMixin",
     "ServerPlayerEntityMixin",
-    "ServerPlayNetworkHandlerMixin",
-    "SpecialScreenHandlerMixin",
-    "SlotMixin"
+    "ServerPlayNetworkHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -35,6 +35,11 @@ public abstract class ItemStackMixin implements Openable {
 	}
 
 	@Override
+	public Runnable clickopener$getCloser() {
+		return clickopener$closer;
+	}
+
+	@Override
 	public boolean clickopener$hasCloser() {
 		return clickopener$closer != null;
 	}

@@ -9,11 +9,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import megaminds.clickopener.api.ClickType;
 import megaminds.clickopener.impl.Openable;
+import megaminds.clickopener.util.ClickContext;
 import megaminds.clickopener.util.ScreenHelper;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Hand;
 
 @Mixin(ServerPlayNetworkHandler.class)
 public abstract class ServerPlayNetworkHandlerMixin {
@@ -22,13 +24,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
 
 	@Inject(at = @At(value = "INVOKE", target = "net/minecraft/network/packet/c2s/play/ClickSlotC2SPacket.getRevision()I", shift = Shift.BEFORE), method = "onClickSlot", cancellable = true)
 	public void clickopener_onClickSlot(ClickSlotC2SPacket packet, CallbackInfo info) {
-		var s = packet.getSlot();
-		if (s==ScreenHandler.EMPTY_SPACE_SLOT_INDEX || s==-1) {
+		var slotIndex = packet.getSlot();
+		if (slotIndex==ScreenHandler.EMPTY_SPACE_SLOT_INDEX || slotIndex==-1) {
 			//use Minecraft default handling
 			return;
 		}
 
-		var slot = player.currentScreenHandler.getSlot(s);
+		var slot = player.currentScreenHandler.getSlot(slotIndex);
 		var stack = slot.getStack();
 		if (stack!=null && ((Openable)(Object)stack).clickopener$hasCloser()) {
 			//Do nothing/revert picking up the item
@@ -37,15 +39,19 @@ public abstract class ServerPlayNetworkHandlerMixin {
 			return;
 		}
 
-		var clickType = ClickType.convert(packet.getActionType(), packet.getButton(), s);
+		var clickType = ClickType.convert(packet.getActionType(), packet.getButton(), slotIndex);
 		if (ClickType.OTHER.equals(clickType)) {
 			//use Minecraft default handling
 			return;
 		}
 
-		if (ScreenHelper.openScreen(player, clickType, stack, slot.inventory)) {
-			//Successfully opened, so don't do anything else
-			info.cancel();
-		}//else Minecraft default handling
+		//player, clickType, stack, slot.inventory
+		for (var hand : Hand.values()) {
+			if (ScreenHelper.openScreen(new ClickContext(player, hand, slot.inventory, slot.getIndex(), clickType, stack))) {
+				//Successfully opened, so don't do anything else
+				info.cancel();
+				return;
+			}//else Minecraft default handling
+		}
 	}	
 }
