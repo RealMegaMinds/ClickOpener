@@ -197,7 +197,7 @@ public class Config {
 
 		@Override
 		public String toString() {
-			return "[list="+whitelist+", exceptions="+blacklist+", defaultClickType=" + defaultClickType + "]";
+			return "[whitelist="+whitelist+", blacklist="+blacklist+", defaultClickType=" + defaultClickType + "]";
 		}
 	}
 }
