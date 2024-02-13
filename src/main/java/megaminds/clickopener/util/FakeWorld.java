@@ -132,20 +132,19 @@ public class FakeWorld extends ServerWorld {
 			UnsafeAccess.UNSAFE.putObject(fakeWorld, CONTEXT_OFFSET, context);
 			return fakeWorld;
 		} catch (InstantiationException e) {
-			//TODO Fallback to using constructor?
-			throw new RuntimeException("Failed to allocate instance of FakeWorld.", e);
+			throw new ItemOpenException("Failed to allocate instance of FakeWorld.", e);
 		}
 	}
-	
+
 	private ServerWorld delegate() {
 		System.out.println(StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE).walk(s -> s.skip(1).findFirst().get()).getMethodName());
 		return context.player().getServerWorld();
 	}
-	
+
 	private <T> T ifHandlesOrElse(BlockPos pos, Supplier<T> ifHandles, Supplier<T> orElse) {
 		return context.handles(pos) ? ifHandles.get() : orElse.get();
 	}
-	
+
 	private void ifHandlesOrElse(BlockPos pos, Runnable ifHandles, Runnable orElse) {
 		if (context.handles(pos)) {
 			ifHandles.run();
@@ -153,7 +152,7 @@ public class FakeWorld extends ServerWorld {
 			orElse.run();
 		}
 	}
-	
+
 	@Override
 	public boolean setBlockState(BlockPos pos, BlockState state, int flags) {
 		return ifHandlesOrElse(pos, () -> {
@@ -177,7 +176,7 @@ public class FakeWorld extends ServerWorld {
 			return true;
 		}, () -> delegate().setBlockState(pos, state));
 	}
-	
+
 	@Override
 	public boolean removeBlock(BlockPos pos, boolean move) {
 		return ifHandlesOrElse(pos, () -> {
@@ -185,7 +184,7 @@ public class FakeWorld extends ServerWorld {
 			return true;
 		}, () -> delegate().removeBlock(pos, move));
 	}
-	
+
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
 		return ifHandlesOrElse(pos, context::blockState, () -> delegate().getBlockState(pos));
@@ -211,7 +210,7 @@ public class FakeWorld extends ServerWorld {
 			}
 		}, () -> delegate().addSyncedBlockEvent(pos, block, type, data));
 	}
-	
+
 	@Override
 	protected EntityLookup<Entity> getEntityLookup() {
 		return null;
@@ -243,7 +242,7 @@ public class FakeWorld extends ServerWorld {
 	/*
 	 * Delegated methods
 	 */
-	
+
 	@Override
 	public float getMoonSize() {
 		return delegate().getMoonSize();

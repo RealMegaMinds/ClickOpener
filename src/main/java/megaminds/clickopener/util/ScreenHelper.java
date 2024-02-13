@@ -48,7 +48,7 @@ public class ScreenHelper {
 
 		try {
 			return openScreen(clickContext, OpenerRegistry.getOrDefault(bi));
-		} catch (RuntimeException e) {
+		} catch (ItemOpenException e) {
 			ClickOpenerMod.LOGGER.warn("Error opening item", e);
 		}
 		return false;
