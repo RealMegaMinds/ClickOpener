@@ -25,7 +25,7 @@ public class OpenerRegistry {
 		ITEM_SCREEN_OPENERS.put(item, opener);
 	}
 
-	public static ItemScreenOpener get(BlockItem item) {
-		return ITEM_SCREEN_OPENERS.get(item);
+	public static ItemScreenOpener getOrDefault(BlockItem item) {
+		return ITEM_SCREEN_OPENERS.getOrDefault(item, ItemScreenOpener.DEFAULT_OPENER);
 	}
 }

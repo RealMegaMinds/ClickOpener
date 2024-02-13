@@ -46,13 +46,8 @@ public class ScreenHelper {
 			return false;
 		}
 
-		var opener = OpenerRegistry.get(bi);
-		if (opener == null) {
-			opener = ItemScreenOpener.DEFAULT_OPENER;
-		}
-		
 		try {
-			return openScreen(clickContext, opener);
+			return openScreen(clickContext, OpenerRegistry.getOrDefault(bi));
 		} catch (RuntimeException e) {
 			ClickOpenerMod.LOGGER.warn("Error opening item", e);
 		}
