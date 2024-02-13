@@ -13,7 +13,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
@@ -47,11 +46,10 @@ public interface ItemScreenOpener {
 		holder.clickopener$setOpenStack(context::stack);
 		holder.clickopener$addCloseListener(() -> {
 			if (context.blockState() != null) {
+				//Fake break the block to drop the items
 				context.blockState().onStateReplaced(context.world(), context.pos(), Blocks.AIR.getDefaultState(), false);
 			}
-			if (context.blockEntity() != null) {
-				context.blockEntity().setStackNbt(context.stack());
-			}
+			context.setStack(getReplacingStack(context));
 		});
 	}
 
@@ -64,35 +62,22 @@ public interface ItemScreenOpener {
 	}
 
 	default void onStateChange(BlockState oldState, OpenContext context) {
-		//If the state didn't change or is unused, do nothing
+		//State is unchanged or is unused -> do nothing
 		if (oldState == context.blockState() || oldState == null) return;
+
+		//Change to null/air -> destroy the item and close the screen
 		if (context.blockState() == null || context.blockState().isAir()) {
 			context.stack().setCount(0);
 			return;
 		}
+
+		//Assumes other state changes don't close the screen
 		context.setStack(getReplacingStack(context));
 	}
 
 	default ItemStack getReplacingStack(OpenContext context) {
-		var stack = context.blockState().getBlock().asItem().getDefaultStack();
-		if (context.blockState() != context.blockState().getBlock().getDefaultState()) {
-			var nbt = NbtHelper.fromBlockState(context.blockState());
-			nbt.remove("Name");
-			stack.setSubNbt(BlockItem.BLOCK_STATE_TAG_KEY, nbt);
-		}
-		if (context.blockEntity() != null) {
-			var nbt = context.blockEntity().createNbt();
-			if (nbt.getList("Items", NbtElement.COMPOUND_TYPE).isEmpty()) {
-				nbt.remove("Items");
-			}
-			if (nbt.isEmpty()) {
-				stack.removeSubNbt(BlockItem.BLOCK_ENTITY_TAG_KEY);
-			} else {
-				BlockEntity.writeIdToNbt(nbt, context.blockEntity().getType());
-				stack.setSubNbt(BlockItem.BLOCK_ENTITY_TAG_KEY, nbt);
-			}
-		}
-		return stack;
+		if (context.blockState() == null) return ItemStack.EMPTY;
+		return context.blockState().getBlock().getPickStack(context.world(), context.pos(), context.blockState());
 	}
 
 	default Block getBlock(OpenContext context) {
