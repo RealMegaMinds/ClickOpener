@@ -13,10 +13,8 @@ import com.google.gson.GsonBuilder;
 import megaminds.clickopener.api.OpenerRegistry;
 import megaminds.clickopener.util.IdentifierAdapter;
 
-//FIXME AM I INCLUDING SHULKER TOOLTIPS ON ACCIDENT?
-//TODO AM I INCLUDING SHULKER TOOLTIPS ON ACCIDENT?
-
 //implement Item.useOnBlock option for when holding items and clicking
+//Add option for ticking screenhandler when itemstack ticks
 public class ClickOpenerMod implements ModInitializer {
 	public static final String MODID = "clickopener";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
@@ -28,23 +26,12 @@ public class ClickOpenerMod implements ModInitializer {
 	public static final Config CONFIG = new Config();
 	public static final PlayerConfigs PLAYER_CONFIGS = new PlayerConfigs();
 
-	//Add option for ticking screenhandler when itemstack ticks
 	@Override
 	public void onInitialize() {
-		//TODO How long should keep old config reader?
-		if (OldConfigConverter.shouldReadOldConfig()) {
-			OldConfigConverter.fill(CONFIG);
-		} else {
-			CONFIG.reload();
-		}
+		CONFIG.reload();
 		PLAYER_CONFIGS.reload();
 
 		CommandRegistrationCallback.EVENT.register(Commands::register);
-
-//		if (FabricLoader.getInstance().isModLoaded("supplementaries")) {
-//			HandlerRegisterEvent.EVENT.register(SupplementariesCompat::register);
-//		}
-
 		ServerLifecycleEvents.SERVER_STARTING.register(OpenerRegistry::onServerLoading);
 	}
 }
