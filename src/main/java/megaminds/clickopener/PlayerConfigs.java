@@ -26,31 +26,28 @@ public class PlayerConfigs {
 	}
 
 	private PlayerConfig getOrCreate(UUID uuid) {
-		var config = configs.get(uuid);
-		if (config == null) {
-			config = PlayerConfig.defaultConfig();
-			configs.put(uuid, config);
-			write();
-		}
-		return config;
+		return configs.computeIfAbsent(uuid, id -> PlayerConfig.defaultConfig());
 	}
 
-	public boolean isClickTypeAllowed(ServerPlayerEntity player, ClickType clickType) {
-		return clickType == null || clickType.equals(getOrCreate(player.getUuid()).clickType());
+	private void store(UUID uuid, PlayerConfig config) {
+		configs.put(uuid, config);
+		write();
 	}
 
 	private void modifyPlayerConfig(UUID uuid, UnaryOperator<PlayerConfig> modifyFunc) {
-		var old = configs.get(uuid);
-		var config = modifyFunc.apply(old != null ? old : PlayerConfig.defaultConfig());
+		store(uuid, modifyFunc.apply(getOrCreate(uuid)));
+	}
 
-		if (old != config) {
-			configs.put(uuid, config);
-			write();
-		}
+	public boolean isClickTypeAllowed(ServerPlayerEntity player, ClickType clickType) {
+		return clickType == null || clickType.equals(getClickType(player));
 	}
 
 	public void setClickType(ServerPlayerEntity player, ClickType clickType) {
 		modifyPlayerConfig(player.getUuid(), c -> c.withClickType(clickType));
+	}
+
+	public ClickType getClickType(ServerPlayerEntity player) {
+		return getOrCreate(player.getUuid()).clickType();
 	}
 
 	public void reload() {

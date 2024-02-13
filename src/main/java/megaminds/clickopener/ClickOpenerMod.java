@@ -15,6 +15,7 @@ import megaminds.clickopener.util.IdentifierAdapter;
 
 //implement Item.useOnBlock option for when holding items and clicking
 //Add option for ticking screenhandler when itemstack ticks
+//Create feedback translations
 public class ClickOpenerMod implements ModInitializer {
 	public static final String MODID = "clickopener";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
