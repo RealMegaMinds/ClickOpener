@@ -1,7 +1,6 @@
 package megaminds.clickopener.util;
 
 import java.io.IOException;
-import java.lang.StackWalker.Option;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -137,7 +136,6 @@ public class FakeWorld extends ServerWorld {
 	}
 
 	private ServerWorld delegate() {
-		System.out.println(StackWalker.getInstance(Option.RETAIN_CLASS_REFERENCE).walk(s -> s.skip(1).findFirst().get()).getMethodName());
 		return context.player().getServerWorld();
 	}
 
