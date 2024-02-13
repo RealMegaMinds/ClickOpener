@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.4-SNAPSHOT'
+	id 'fabric-loom' version '1.5-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -16,35 +16,6 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
-	
-	//AdditionZ, Supplementaries
-	exclusiveContent {
-		forRepository {
-			maven {url "https://api.modrinth.com/maven"}
-		}
-		filter {
-			includeGroup "maven.modrinth"
-		}
-	}
-	
-	//Supplementaries Squared
-	exclusiveContent {
-		forRepository {
-			maven {url "https://cursemaven.com"}
-		}
-		filter {
-			includeGroup "curse.maven"
-		}
-	}
-	
-	maven {url "https://raw.githubusercontent.com/Aton-Kish/mcmod/maven"}	//ReinforcedShulker
-	
-	//Notes from ReinforcedShulker build.gradle
-	maven {url "https://maven.terraformersmc.com/releases/"}	// ModMenu (Reinforced Core deps)
-	maven {url "https://maven.shedaniel.me/"}	// Cloth Config (Reinforced Core deps)
-	maven {url "https://maven.kyrptonaught.dev"}	// Quick Shulker
-	maven {url "https://www.cursemaven.com"; content {includeGroup "curse.maven"}} //Quick Shulker (workaround)
-	maven {url "https://maven.misterpemodder.com/libs-release"}	// Shulker Box Tooltip
 }
 
 dependencies {
@@ -55,16 +26,6 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modCompileOnly "net.fabricmc.fabric-api:fabric-api-deprecated:${project.fabric_version}"	//Override old versions until other mods have updated
-	
-	//Reinforced Shulkers
-	modCompileOnly "atonkish.reinfshulker:reinforced-shulker-boxes:${project.reinforced_shulker_version}"
-	modCompileOnly "atonkish.reinfcore:reinforced-core:${project.reinforced_core_version}"
-
-	modCompileOnly "maven.modrinth:additionz:${project.additionz_version}"
-//	modCompileOnly "maven.modrinth:supplementaries:${project.supplementaries_version}"
-//	modCompileOnly "curse.maven:supplementaries-squared-838411:${project.supp_squared_version}"
-	modCompileOnly "maven.modrinth:carpet-ams-addition:${project.carpet_ams_addition_version}"
 }
 
 processResources {
