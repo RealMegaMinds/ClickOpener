@@ -28,11 +28,12 @@ public interface BlockScreenOpener extends Opener<BlockScreenOpener, BlockOpenCo
 
 	@Override
 	default ActionResult open(BlockOpenContext context) {
+		if (context.initialStack().getCount() != 1) return ActionResult.FAIL;
 		var result = context.getBlockState().onUse(context.world(), context.player(), context.hand(), context.hitResult());
 		if (result.isAccepted()) {
 			return result;
 		}
-		return context.player().getStackInHand(context.hand()).useOnBlock(context.toItemUsageContext());
+		return context.runWithStackInHand(context::getCursorStack, context::setCursorStack, stack -> stack.useOnBlock(context.toItemUsageContext()));
 	}
 
 	@Override
@@ -46,7 +47,7 @@ public interface BlockScreenOpener extends Opener<BlockScreenOpener, BlockOpenCo
 	default ItemStack getReplacingStack(BlockOpenContext context) {
 		return context.getBlockState().getBlock().getPickStack(context.world(), context.pos(), context.getBlockState());
 	}
-	
+
 	default void onMarkDirty(BlockOpenContext context) {
 		context.setStack(getReplacingStack(context));
 	}

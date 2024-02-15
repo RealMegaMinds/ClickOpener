@@ -10,7 +10,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 
 public class ClickContext {
 	private final ServerPlayerEntity player;
@@ -44,11 +43,11 @@ public class ClickContext {
 	public ServerPlayerEntity player() {
 		return player;
 	}
-	
+
 	public ServerWorld world() {
 		return player().getServerWorld();
 	}
-	
+
 	public BlockPos pos() {
 		return player().getBlockPos();
 	}
@@ -76,11 +75,11 @@ public class ClickContext {
 	public ItemStack initialStack() {
 		return initialStack;
 	}
-	
+
 	public BlockHitResult hitResult() {
-		return new BlockHitResult(Vec3d.add(pos(), .5, 1, .5), Direction.DOWN, pos(), false);
+		return new BlockHitResult(pos().toCenterPos(), Direction.NORTH, pos(), true);
 	}
-	
+
 	public ItemUsageContext toItemUsageContext() {
 		return new ItemUsageContext(world(), player(), hand(), player().getStackInHand(hand()), hitResult());
 	}

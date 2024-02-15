@@ -33,14 +33,14 @@ public class ScreenHelper {
 		}
 
 		//Restore the cursor stack and let player know
-		context.player().currentScreenHandler.setCursorStack(context.initialCursorStack());
+		context.player().currentScreenHandler.setCursorStack(context.getCursorStack());
 		context.player().currentScreenHandler.syncState();
 
 		return result.isAccepted();
 	}
 
 	public static boolean openScreen(ClickContext context) {
-		if (context.initialStack().getCount() != 1 || !ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(context.player(), context.clickType()) || !ClickOpenerMod.CONFIG.isAllowed(context.initialStack().getItem())) {
+		if (!ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(context.player(), context.clickType()) || !ClickOpenerMod.CONFIG.isAllowed(context.initialStack().getItem())) {
 			return false;
 		}
 
