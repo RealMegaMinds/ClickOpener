@@ -20,6 +20,7 @@ import io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import megaminds.clickopener.impl.BlockOpenContext;
 import megaminds.clickopener.impl.BlockScreenOpener;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -113,7 +114,7 @@ import net.minecraft.world.tick.WorldTickScheduler;
 
 @SuppressWarnings({"deprecation", "java:S5803"})
 public class FakeWorld extends ServerWorld {
-	private static final long RANDOM_OFFSET = UnsafeAccess.fieldOffset(World.class, "random");
+	private static final long RANDOM_OFFSET = UnsafeAccess.fieldOffset(World.class, FabricLoader.getInstance().getMappingResolver().mapFieldName("intermediary", "net.minecraft.class_1937", "field_9229", "Lnet/minecraft/class_5819;"));
 	private static final long CONTEXT_OFFSET = UnsafeAccess.fieldOffset(FakeWorld.class, "context");
 
 	private final BlockOpenContext context;

@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder;
 import megaminds.clickopener.api.OpenerRegistry;
 import megaminds.clickopener.util.IdentifierAdapter;
 
+//When using item on block, check item is allowed
 //Add option for ticking screenhandler when itemstack ticks
 //Create feedback translations
 public class ClickOpenerMod implements ModInitializer {
