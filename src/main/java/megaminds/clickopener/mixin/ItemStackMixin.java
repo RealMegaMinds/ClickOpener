@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import megaminds.clickopener.impl.Openable;
+import megaminds.clickopener.interfaces.Openable;
 import net.minecraft.item.ItemStack;
 
 @Mixin(ItemStack.class)

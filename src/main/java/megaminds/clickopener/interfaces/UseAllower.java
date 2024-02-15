@@ -1,4 +1,4 @@
-package megaminds.clickopener.impl;
+package megaminds.clickopener.interfaces;
 
 public interface UseAllower {
 	void clickopener$allowUse();

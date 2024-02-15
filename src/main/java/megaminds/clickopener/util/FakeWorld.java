@@ -18,8 +18,11 @@ import com.mojang.datafixers.util.Pair;
 
 import io.netty.util.internal.shaded.org.jctools.util.UnsafeAccess;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import megaminds.clickopener.impl.BlockOpenContext;
+import megaminds.clickopener.impl.BlockScreenOpener;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
@@ -113,7 +116,7 @@ public class FakeWorld extends ServerWorld {
 	private static final long RANDOM_OFFSET = UnsafeAccess.fieldOffset(World.class, "random");
 	private static final long CONTEXT_OFFSET = UnsafeAccess.fieldOffset(FakeWorld.class, "context");
 
-	private final OpenContext context;
+	private final BlockOpenContext context;
 
 	private FakeWorld() {
 		super(null, null, null, null, null, null, null, false, 0, null, false, null);
@@ -121,7 +124,7 @@ public class FakeWorld extends ServerWorld {
 	}
 
 	@SuppressWarnings("resource")
-	public static FakeWorld create(OpenContext context) {
+	public static FakeWorld create(BlockOpenContext context) {
 		try {
 			var fakeWorld = (FakeWorld) UnsafeAccess.UNSAFE.allocateInstance(FakeWorld.class);
 			//set public fields from world
@@ -178,35 +181,30 @@ public class FakeWorld extends ServerWorld {
 	@Override
 	public boolean removeBlock(BlockPos pos, boolean move) {
 		return ifHandlesOrElse(pos, () -> {
-			context.setBlockState(null);
+			context.setBlockState(Blocks.AIR.getDefaultState());
 			return true;
 		}, () -> delegate().removeBlock(pos, move));
 	}
 
 	@Override
 	public BlockState getBlockState(BlockPos pos) {
-		return ifHandlesOrElse(pos, context::blockState, () -> delegate().getBlockState(pos));
+		return ifHandlesOrElse(pos, context::getBlockState, () -> delegate().getBlockState(pos));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos pos, BlockEntityType<T> type) {
-		return ifHandlesOrElse(pos, () -> (Optional<T>) Optional.ofNullable(context.blockEntity()).filter(be -> be.getType() == type), () -> delegate().getBlockEntity(pos, type));
+		return ifHandlesOrElse(pos, () -> (Optional<T>) Optional.ofNullable(context.getBlockEntity()).filter(be -> be.getType() == type), () -> delegate().getBlockEntity(pos, type));
 	}
 
 	@Override
 	public BlockEntity getBlockEntity(BlockPos pos) {
-		return ifHandlesOrElse(pos, context::blockEntity, () -> delegate().getBlockEntity(pos));
+		return ifHandlesOrElse(pos, context::getBlockEntity, () -> delegate().getBlockEntity(pos));
 	}
 
 	@Override
 	public void addSyncedBlockEvent(BlockPos pos, Block block, int type, int data) {
-		ifHandlesOrElse(pos, () -> {
-			var state = context.blockState();
-			if (state != null) {
-				state.onSyncedBlockEvent(this, pos, type, data);
-			}
-		}, () -> delegate().addSyncedBlockEvent(pos, block, type, data));
+		ifHandlesOrElse(pos, () -> context.getBlockState().onSyncedBlockEvent(this, pos, type, data), () -> delegate().addSyncedBlockEvent(pos, block, type, data));
 	}
 
 	@Override
@@ -228,8 +226,7 @@ public class FakeWorld extends ServerWorld {
 
 	@Override
 	public void markDirty(BlockPos pos) {
-		if (context.handles(pos)) return;
-		delegate().markDirty(pos);
+		ifHandlesOrElse(pos, () -> context.openerConsumer(BlockScreenOpener::onMarkDirty), () -> delegate().markDirty(pos));
 	}
 
 	@Override

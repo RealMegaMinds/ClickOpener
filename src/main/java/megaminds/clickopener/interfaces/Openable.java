@@ -1,4 +1,4 @@
-package megaminds.clickopener.impl;
+package megaminds.clickopener.interfaces;
 
 import net.minecraft.item.ItemStack;
 

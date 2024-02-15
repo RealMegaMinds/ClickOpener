@@ -7,12 +7,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 
 import megaminds.clickopener.api.ClickType;
-import megaminds.clickopener.impl.ArgumentChecker;
+import megaminds.clickopener.interfaces.ArgumentChecker;
 
 import static net.minecraft.server.command.CommandManager.literal;
 
 import java.util.Arrays;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -23,7 +22,6 @@ import static com.mojang.brigadier.arguments.StringArgumentType.getString;
 
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
-import net.minecraft.item.BlockItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.command.CommandManager.RegistrationEnvironment;
@@ -33,14 +31,14 @@ import net.minecraft.util.Formatting;
 
 public class Commands {
 	private static final int COMMAND_ERROR = 0;
-	private static final SuggestionProvider<ServerCommandSource> BLOCK_ITEM_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.ITEM.stream().filter(BlockItem.class::isInstance).map(Registries.ITEM::getId), builder);
+	private static final SuggestionProvider<ServerCommandSource> ITEM_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.ITEM.stream().map(Registries.ITEM::getId), builder);
 	private static final SuggestionProvider<ServerCommandSource> ITEM_TAG_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.ITEM.streamTags().map(TagKey::id), builder);
 	private static final SuggestionProvider<ServerCommandSource> BLOCK_TAG_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(Registries.BLOCK.streamTags().map(TagKey::id), builder);
 	private static final SuggestionProvider<ServerCommandSource> WHITELIST_ITEM_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(ClickOpenerMod.CONFIG.getItemList(), builder);
 	private static final SuggestionProvider<ServerCommandSource> WHITELIST_ITEMTAG_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(ClickOpenerMod.CONFIG.getItemTagsList().stream().map(TagKey::id), builder);
 	private static final SuggestionProvider<ServerCommandSource> WHITELIST_BLOCKTAG_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(ClickOpenerMod.CONFIG.getBlockTagsList().stream().map(TagKey::id), builder);
 	private static final SuggestionProvider<ServerCommandSource> BLACKLIST_SUGGESTIONS = (context, builder) -> CommandSource.suggestIdentifiers(ClickOpenerMod.CONFIG.getBlacklist(), builder);
-	private static final SuggestionProvider<ServerCommandSource> CLICK_TYPE_SUGGESTIONS = (context, builder) -> CommandSource.suggestMatching(Arrays.stream(ClickType.values()).filter(Predicate.not(ClickType.OTHER::equals)).map(Enum::name), builder);
+	private static final SuggestionProvider<ServerCommandSource> CLICK_TYPE_SUGGESTIONS = (context, builder) -> CommandSource.suggestMatching(Arrays.stream(ClickType.values()).map(Enum::name), builder);
 	private static final String ID = "id";
 	private static final String CLICK_TYPE = "clickType";
 	private static final String DEFAULT_CLICK_TYPE = "defaultClickType";
@@ -58,7 +56,7 @@ public class Commands {
 		var add = literal("add")
 				.then(literal("item")
 						.then(argument(ID, identifier())
-								.suggests(BLOCK_ITEM_SUGGESTIONS)
+								.suggests(ITEM_SUGGESTIONS)
 								.executes(c -> addItem(c, true)))
 						.executes(c -> addItem(c, true)))
 				.then(literal("blocktag")
@@ -92,7 +90,7 @@ public class Commands {
 
 		add = literal("add")
 				.then(argument(ID, identifier())
-						.suggests(BLOCK_ITEM_SUGGESTIONS)
+						.suggests(ITEM_SUGGESTIONS)
 						.executes(c -> addItem(c, false)))
 				.executes(c -> addItem(c, false));
 
@@ -133,12 +131,7 @@ public class Commands {
 	}
 
 	private static int setClickType(CommandContext<ServerCommandSource> context, boolean player) throws CommandSyntaxException {
-		var type = ClickType.tryValueOf(getString(context, player ? CLICK_TYPE : DEFAULT_CLICK_TYPE), ClickType.OTHER);
-		if (ClickType.OTHER.equals(type)) {
-			context.getSource().sendError(Text.of("Invalid ClickType"));
-			return COMMAND_ERROR;
-		}
-
+		var type = ClickType.tryValueOf(getString(context, player ? CLICK_TYPE : DEFAULT_CLICK_TYPE));
 		if (player) {
 			ClickOpenerMod.PLAYER_CONFIGS.setClickType(context.getSource().getPlayerOrThrow(), type);
 			context.getSource().sendFeedback(() -> Text.of("ClickType set to "+type), false);
@@ -158,12 +151,12 @@ public class Commands {
 
 	private static int addItem(CommandContext<ServerCommandSource> context, boolean isWhitelist) throws CommandSyntaxException {
 		var item = ArgumentChecker.hasArgument(context, ID) ? getIdentifier(context, ID) : Registries.ITEM.getId(context.getSource().getPlayerOrThrow().getMainHandStack().getItem());
-		if (item.equals(Registries.ITEM.getDefaultId()) || !(Registries.ITEM.get(item) instanceof BlockItem)) {
+		if (item.equals(Registries.ITEM.getDefaultId())) {
 			context.getSource().sendError(Text.of("Invalid Item"));
 			return COMMAND_ERROR;
 		}
 
-		ClickOpenerMod.CONFIG.addBlockItem(item, isWhitelist);
+		ClickOpenerMod.CONFIG.addItem(item, isWhitelist);
 		context.getSource().sendFeedback(() -> Text.of(item+" added to "+(isWhitelist ? "whitelist." : "blacklist.")), false);
 		return Command.SINGLE_SUCCESS;
 	}
@@ -184,7 +177,7 @@ public class Commands {
 
 	private static int removeItem(CommandContext<ServerCommandSource> context, boolean isWhitelist) throws CommandSyntaxException {
 		var item = ArgumentChecker.hasArgument(context, ID) ? getIdentifier(context, ID) : Registries.ITEM.getId(context.getSource().getPlayerOrThrow().getMainHandStack().getItem());
-		ClickOpenerMod.CONFIG.removeBlockItem(item, isWhitelist);
+		ClickOpenerMod.CONFIG.removeItem(item, isWhitelist);
 		context.getSource().sendFeedback(() -> Text.of(item+" removed from "+(isWhitelist ? "whitelist." : "blacklist.")), false);
 		return Command.SINGLE_SUCCESS;
 	}
@@ -212,16 +205,16 @@ public class Commands {
 	}
 
 	private static int displayClickType(CommandContext<ServerCommandSource> context, boolean player) throws CommandSyntaxException {
-			ClickType clickType;
-			String header;
-			if (player) {
-				clickType = ClickOpenerMod.PLAYER_CONFIGS.getClickType(context.getSource().getPlayerOrThrow());
-				header = "ClickType";
-			} else {
-				clickType = ClickOpenerMod.CONFIG.getClickType();
-				header = "Default ClickType";
-			}
-			context.getSource().sendFeedback(() -> Text.empty().append(Text.literal(header).append(":\n").styled(s -> s.withBold(true))).append(clickType.name()), false);
-			return Command.SINGLE_SUCCESS;
+		ClickType clickType;
+		String header;
+		if (player) {
+			clickType = ClickOpenerMod.PLAYER_CONFIGS.getClickType(context.getSource().getPlayerOrThrow());
+			header = "ClickType";
+		} else {
+			clickType = ClickOpenerMod.CONFIG.getClickType();
+			header = "Default ClickType";
+		}
+		context.getSource().sendFeedback(() -> Text.empty().append(Text.literal(header).append(":\n").styled(s -> s.withBold(true))).append(clickType.name()), false);
+		return Command.SINGLE_SUCCESS;
 	}
 }

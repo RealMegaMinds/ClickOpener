@@ -4,7 +4,7 @@ import java.util.function.BiConsumer;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 
 public class OpenerRegisterEvent {
 	public static final Event<OpenerRegisterEventListener> EVENT = EventFactory.createArrayBacked(OpenerRegisterEventListener.class, listeners -> registyFunc -> {
@@ -14,6 +14,6 @@ public class OpenerRegisterEvent {
 	});
 
 	public interface OpenerRegisterEventListener {
-		void onRegister(BiConsumer<BlockItem, ItemScreenOpener> registyFunc);
+		void onRegister(BiConsumer<Item, Opener<?, ?>> registyFunc);
 	}
 }

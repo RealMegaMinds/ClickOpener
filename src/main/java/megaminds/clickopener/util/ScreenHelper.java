@@ -1,55 +1,62 @@
 package megaminds.clickopener.util;
 
 import megaminds.clickopener.ClickOpenerMod;
-import megaminds.clickopener.api.ItemScreenOpener;
+import megaminds.clickopener.api.OpenContext;
+import megaminds.clickopener.api.Opener;
 import megaminds.clickopener.api.OpenerRegistry;
-import megaminds.clickopener.impl.ClosePacketSkipper;
+import megaminds.clickopener.impl.BlockScreenOpener;
+import megaminds.clickopener.impl.ClickContext;
+import megaminds.clickopener.impl.ItemScreenOpener;
+import megaminds.clickopener.interfaces.ClosePacketSkipper;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 
 public class ScreenHelper {
 	private ScreenHelper() {}
 
-	public static boolean openScreen(ClickContext clickContext, ItemScreenOpener opener) {
-		var context = opener.constructContext(clickContext);
-
+	private static boolean openScreenFromContext(OpenContext<?, ?> context) {
 		var previous = context.player().currentScreenHandler;
 
-		//Save the cursor stack so it can be restored later and let player know we took the cursor stack
-		var cursorStack = previous.getCursorStack();
+		//The cursor stack will be restored later
 		previous.setCursorStack(ItemStack.EMPTY);
 		previous.syncState();	//also reverts picking up the item
 
 		//Open the inventory (skip the close packet to prevent the cursor position from resetting)
 		((ClosePacketSkipper)context.player()).clickopener$setSkipClosePacket(true);
-		opener.preOpen(context);
-		opener.open(context);
-		var success = context.player().currentScreenHandler != previous;
+		context.openerConsumer(Opener::preOpen);
+		var result = context.openerFunction(Opener::open);
+		var openedScreen = context.player().currentScreenHandler != previous;
 		((ClosePacketSkipper)context.player()).clickopener$setSkipClosePacket(false);
 
-		if (success) {
-			opener.postOpen(context);
+		if (openedScreen) {
+			context.openerConsumer(Opener::postOpen);
 		}
 
 		//Restore the cursor stack and let player know
-		context.player().currentScreenHandler.setCursorStack(cursorStack);
+		context.player().currentScreenHandler.setCursorStack(context.initialCursorStack());
 		context.player().currentScreenHandler.syncState();
 
-		return success;
+		return result.isAccepted();
 	}
-	
-	public static boolean openScreen(ClickContext clickContext) {
-		//TODO Remove when adding non-block functionality
-		if (!(clickContext.stack().getItem() instanceof BlockItem bi)) return false;
 
-		if (clickContext.stack().getCount() != 1 || !ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(clickContext.player(), clickContext.clickType()) || !ClickOpenerMod.CONFIG.isAllowed(bi)) {
+	public static boolean openScreen(ClickContext context) {
+		if (context.initialStack().getCount() != 1 || !ClickOpenerMod.PLAYER_CONFIGS.isClickTypeAllowed(context.player(), context.clickType()) || !ClickOpenerMod.CONFIG.isAllowed(context.initialStack().getItem())) {
 			return false;
 		}
 
+		var opener = OpenerRegistry.get(context.initialStack().getItem());
+		if (opener == null) {
+			if (context.initialStack().getItem() instanceof BlockItem) {
+				opener = BlockScreenOpener.DEFAULT_OPENER;
+			} else {
+				opener = ItemScreenOpener.DEFAULT_OPENER;
+			}
+		}
+
 		try {
-			return openScreen(clickContext, OpenerRegistry.getOrDefault(bi));
+			return openScreenFromContext(opener.mutateContext(context));
 		} catch (ItemOpenException e) {
-			ClickOpenerMod.LOGGER.warn("Error opening item", e);
+			ClickOpenerMod.LOGGER.warn("Error opening item:", e);
 		}
 		return false;
 	}

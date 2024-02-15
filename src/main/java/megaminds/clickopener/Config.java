@@ -17,6 +17,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 
@@ -105,7 +106,7 @@ public class Config {
 		}
 	}
 
-	public void addBlockItem(Identifier id, boolean allow, boolean writeToFile) {
+	public void addItem(Identifier id, boolean allow, boolean writeToFile) {
 		if (allow) {
 			itemList.add(id);
 		} else {
@@ -114,11 +115,11 @@ public class Config {
 		if (writeToFile) write();
 	}
 
-	public void addBlockItem(Identifier id, boolean allow) {
-		addBlockItem(id, allow, true);
+	public void addItem(Identifier id, boolean allow) {
+		addItem(id, allow, true);
 	}
 
-	public void removeBlockItem(Identifier id, boolean allow) {
+	public void removeItem(Identifier id, boolean allow) {
 		if (allow) {
 			itemList.remove(id);
 		} else {
@@ -151,12 +152,16 @@ public class Config {
 		this.clickType = Objects.requireNonNullElse(clickType, ClickType.RIGHT);
 	}
 
-	public boolean isAllowed(BlockItem item) {
+	public boolean isAllowed(Item item) {
 		var id = Registries.ITEM.getId(item);
 		return (itemList.contains(id)
-				|| itemTagsList.stream().anyMatch(Registries.ITEM.getEntry(item)::isIn)
-				|| blockTagsList.stream().anyMatch(Registries.BLOCK.getEntry(item.getBlock())::isIn))
-				&& !blacklist.contains(id);
+				|| anyMatch(itemTagsList, Registries.ITEM.getEntry(item))
+				|| item instanceof BlockItem bi && anyMatch(blockTagsList, Registries.BLOCK.getEntry(bi.getBlock()))
+				) && !blacklist.contains(id);
+	}
+
+	private <T> boolean anyMatch(Set<TagKey<T>> tags, RegistryEntry<T> entry) {
+		return tags.stream().anyMatch(entry::isIn);
 	}
 
 	public ConfigBuilder asBuilder() {

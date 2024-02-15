@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
 
-import megaminds.clickopener.impl.ArgumentChecker;
+import megaminds.clickopener.interfaces.ArgumentChecker;
 
 @Mixin(value = CommandContext.class, remap = false)
 public abstract class CommandContextMixin implements ArgumentChecker {

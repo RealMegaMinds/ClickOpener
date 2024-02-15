@@ -8,8 +8,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import megaminds.clickopener.api.ClickType;
-import megaminds.clickopener.impl.Openable;
-import megaminds.clickopener.util.ClickContext;
+import megaminds.clickopener.impl.ClickContext;
+import megaminds.clickopener.interfaces.Openable;
 import megaminds.clickopener.util.ScreenHelper;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.ScreenHandler;
@@ -40,14 +40,13 @@ public abstract class ServerPlayNetworkHandlerMixin {
 		}
 
 		var clickType = ClickType.convert(packet.getActionType(), packet.getButton(), slotIndex);
-		if (ClickType.OTHER.equals(clickType)) {
+		if (ClickType.NONE.equals(clickType)) {
 			//use Minecraft default handling
 			return;
 		}
 
-		//player, clickType, stack, slot.inventory
 		for (var hand : Hand.values()) {
-			if (ScreenHelper.openScreen(new ClickContext(player, hand, slot.inventory, slot.getIndex(), clickType, stack))) {
+			if (ScreenHelper.openScreen(new ClickContext(player, hand, slot.inventory, slot.getIndex(), clickType, player.currentScreenHandler.getCursorStack(), stack))) {
 				//Successfully opened, so don't do anything else
 				info.cancel();
 				return;

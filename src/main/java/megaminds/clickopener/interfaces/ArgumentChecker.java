@@ -1,4 +1,4 @@
-package megaminds.clickopener.impl;
+package megaminds.clickopener.interfaces;
 
 import com.mojang.brigadier.context.CommandContext;
 

@@ -1,52 +1,39 @@
 package megaminds.clickopener.mixin;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Supplier;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import megaminds.clickopener.impl.Openable;
-import megaminds.clickopener.impl.OpenerHolder;
+
+import megaminds.clickopener.api.OpenContext;
+import megaminds.clickopener.api.Opener;
+import megaminds.clickopener.interfaces.OpenContextHolder;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 
 @Mixin(ScreenHandler.class)
-public abstract class ScreenHandlerMixin implements OpenerHolder {
+public abstract class ScreenHandlerMixin implements OpenContextHolder {
 	@Unique
 	@SuppressWarnings("java:S116")
-	private Supplier<ItemStack> clickopener$openStack;
-	private List<Runnable> closeListeners;
+	private OpenContext<?, ?> clickopener$openContext;
 
 	@Override
-	public void clickopener$setOpenStack(Supplier<ItemStack> stack) {
-		clickopener$openStack = stack;
+	public void clickopener$setOpenContext(OpenContext<?, ?> openContext) {
+		clickopener$openContext = openContext;
 	}
 
 	@Override
-	public boolean clickopener$hasOpenStack() {
-		return clickopener$openStack != null;
+	public boolean clickopener$hasOpenContext() {
+		return clickopener$openContext != null;
 	}
 
 	@SuppressWarnings("unused")
 	@Inject(at = @At("RETURN"), method = "onClosed")
 	private void clickopener$onClose(PlayerEntity player, CallbackInfo info) {
-		if (clickopener$hasOpenStack()) {
-			Openable.cast(clickopener$openStack.get()).clickopener$clearCloser();
-			clickopener$openStack = null;
+		if (clickopener$hasOpenContext()) {
+			clickopener$openContext.openerConsumer(Opener::onClose);
+			clickopener$openContext = null;
 		}
-		if (closeListeners != null) {
-			closeListeners.forEach(Runnable::run);
-		}
-	}
-
-	@Override
-	public void clickopener$addCloseListener(Runnable listener) {
-		if (closeListeners == null) closeListeners = new ArrayList<>();
-		closeListeners.add(listener);
 	}
 }
