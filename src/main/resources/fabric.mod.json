@@ -2,11 +2,11 @@
   "schemaVersion": 1,
   "id": "clickopener",
   "version": "${version}",
-
-  "name": "Click Opener Mod",
-  "description": "Fabric Mod that opens inventory screens when their items are clicked",
+  "name": "Click Opener Continued!",
+  "description": "Use blocks like shulkers directly in your inventory!\nContinuation of Hoid2's Click Opener Mod.",
   "authors": [
-    "Hoid2"
+    "Hoid2",
+    "JongWasTaken"
   ],
   "contact": {},
   "license": "MIT",
@@ -14,7 +14,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "megaminds.clickopener.ClickOpenerMod"
+      "pw.smto.clickopener.ClickOpenerMod"
     ]
   },
   "mixins": [
@@ -22,6 +22,6 @@
   ],
   "depends": {
     "fabric-api": "*",
-    "minecraft": "~1.20.1"
+    "minecraft": "~1.21"
   }
 }
